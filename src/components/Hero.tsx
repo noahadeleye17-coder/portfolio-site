@@ -81,8 +81,8 @@ export const Hero: React.FC<HeroProps> = ({
   return (
     <section id="hero" className="relative pt-28 sm:pt-36 pb-16 sm:pb-24 overflow-hidden bg-grid-pattern">
       {/* Ambient background glows */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[340px] bg-[#CC9A24]/10 dark:bg-[#CC9A24]/15 blur-[120px] rounded-full pointer-events-none -z-10" />
-      <div className="absolute top-1/3 right-10 w-[350px] h-[350px] bg-sky-500/10 dark:bg-sky-500/10 blur-[100px] rounded-full pointer-events-none -z-10" />
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-150 h-80 bg-[#CC9A24]/10 dark:bg-[#CC9A24]/15 blur-[120px] rounded-full pointer-events-none -z-10" />
+      <div className="absolute top-1/3 right-10 w-87.5 h-87.5 bg-sky-500/10 dark:bg-sky-500/10 blur-[100px] rounded-full pointer-events-none -z-10" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16">
@@ -110,7 +110,7 @@ export const Hero: React.FC<HeroProps> = ({
             {/* Main Heading */}
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-[#3A2F26] dark:text-white tracking-tight leading-[1.12] mb-4">
               Building scalable systems with{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#B9861F] via-[#CC9A24] to-sky-500 dark:from-[#D9A62E] dark:via-[#DFB94A] dark:to-sky-400">
+              <span className="text-transparent bg-clip-text bg-linear-to-r from-[#B9861F] via-[#CC9A24] to-sky-500 dark:from-[#D9A62E] dark:via-[#DFB94A] dark:to-sky-400">
                 precision & speed.
               </span>
             </h1>

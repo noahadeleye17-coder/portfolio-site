@@ -66,7 +66,7 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose }) 
             className="w-full h-full object-cover"
             referrerPolicy="no-referrer"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#2A211C]/90 via-[#2A211C]/40 to-transparent flex items-end p-6 sm:p-8">
+          <div className="absolute inset-0 bg-linear-to-t from-[#2A211C]/90 via-[#2A211C]/40 to-transparent flex items-end p-6 sm:p-8">
             <div>
               <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-[#B9861F] text-white mb-2 shadow-xs">
                 {project.category}
