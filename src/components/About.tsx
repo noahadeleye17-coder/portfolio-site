@@ -21,23 +21,23 @@ interface AboutProps {
 export const About: React.FC<AboutProps> = ({ profile, onOpenResume }) => {
   const coreValues = [
     {
-      title: 'Scalable Architecture',
-      description: 'Designing resilient microservices and decoupled frontend layers that sustain exponential traffic growth gracefully.',
+      title: 'Solve real problems first',
+      description: 'Off-Campus Hub exists because finding housing near FUTA was genuinely painful \u2014 I build things people around me actually need.',
       icon: <Cpu className="w-5 h-5 text-[#CC9A24]" />
     },
     {
-      title: 'Type Safety & Quality',
-      description: 'Strict typing with TypeScript, deterministic state modeling, and automated test pipelines that stop bugs before production.',
+      title: 'Ship the whole thing',
+      description: 'From database schema to production deployment, I handle the entire stack solo rather than stopping at a prototype.',
       icon: <ShieldCheck className="w-5 h-5 text-emerald-500" />
     },
     {
-      title: 'Performance-First UI',
-      description: 'Obsession with fast load times, zero cumulative layout shifts, smooth 60fps animations, and accessible ARIA compliance.',
+      title: 'Keep it clean and fast',
+      description: 'Straightforward, well-organized code and responsive interfaces that work well on the low-end devices most of my users actually have.',
       icon: <Zap className="w-5 h-5 text-amber-500" />
     },
     {
-      title: 'Mentorship & Culture',
-      description: 'Championing constructive code reviews, comprehensive technical documentation, and empowering team members to excel.',
+      title: 'Learn by building',
+      description: 'Picking up Supabase, PWA packaging, and AI integrations as I need them for real projects, not in isolation.',
       icon: <Users className="w-5 h-5 text-purple-500" />
     }
   ];

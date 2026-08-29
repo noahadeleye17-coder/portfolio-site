@@ -1,0 +1,2764 @@
+diff -ruN a2/.gitignore b2/.gitignore
+--- a2/.gitignore	2026-08-29 14:40:37.947780074 +0000
++++ b2/.gitignore	2026-08-29 14:40:37.952566544 +0000
+@@ -1,9 +1,8 @@
+-node_modules/ 
+-build/ 
+-dist/ 
+-coverage/ 
+-.DS_Store *
+-.log 
++node_modules/
++build/
++dist/
++coverage/
++.DS_Store
++*.log
+ .env*
+ !.env.example
+-
+diff -ruN a2/src/App.tsx b2/src/App.tsx
+--- a2/src/App.tsx	2026-08-29 14:40:37.949115364 +0000
++++ b2/src/App.tsx	2026-08-29 14:40:37.953074655 +0000
+@@ -14,8 +14,12 @@
+ import { Footer } from './components/Footer';
+ import { ResumeModal } from './components/ResumeModal';
+ import { PortfolioCustomizer } from './components/PortfolioCustomizer';
++import { CommandPalette } from './components/CommandPalette';
++import { TerminalModal } from './components/TerminalModal';
++import { ProjectModal } from './components/ProjectModal';
+ import { defaultPortfolioData } from './data/initialPortfolio';
+-import { ProfileData } from './types';
++import { ProfileData, Project } from './types';
++import { Command, Terminal } from 'lucide-react';
+ 
+ const STORAGE_KEY_PROFILE = 'portfolio_profile_data_v1';
+ const STORAGE_KEY_THEME = 'portfolio_theme_mode';
+@@ -47,6 +51,9 @@
+ 
+   const [isResumeOpen, setIsResumeOpen] = useState(false);
+   const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
++  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
++  const [isTerminalOpen, setIsTerminalOpen] = useState(false);
++  const [activeModalProject, setActiveModalProject] = useState<Project | null>(null);
+ 
+   // Sync dark mode class to <html> tag
+   useEffect(() => {
+@@ -59,6 +66,19 @@
+     localStorage.setItem(STORAGE_KEY_THEME, isDark ? 'dark' : 'light');
+   }, [isDark]);
+ 
++  // Global keyboard shortcuts (Cmd+K / Ctrl+K)
++  useEffect(() => {
++    const handleKeyDown = (e: KeyboardEvent) => {
++      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
++        e.preventDefault();
++        setIsCommandPaletteOpen((prev) => !prev);
++      }
++    };
++
++    window.addEventListener('keydown', handleKeyDown);
++    return () => window.removeEventListener('keydown', handleKeyDown);
++  }, []);
++
+   const handleToggleTheme = () => {
+     setIsDark((prev) => !prev);
+   };
+@@ -90,6 +110,8 @@
+         onToggleTheme={handleToggleTheme}
+         onOpenResume={() => setIsResumeOpen(true)}
+         onOpenCustomizer={() => setIsCustomizerOpen(true)}
++        onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
++        onOpenTerminal={() => setIsTerminalOpen(true)}
+       />
+ 
+       {/* Main Content Sections */}
+@@ -98,6 +120,8 @@
+         <Hero
+           profile={profile}
+           onOpenResume={() => setIsResumeOpen(true)}
++          onOpenTerminal={() => setIsTerminalOpen(true)}
++          onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
+         />
+ 
+         {/* Biography & Background */}
+@@ -114,6 +138,8 @@
+         {/* Skills & Competencies */}
+         <Skills
+           categories={profile.skillCategories}
++          projects={profile.projects}
++          onSelectProject={(project) => setActiveModalProject(project)}
+         />
+ 
+         {/* Career Experience & Education */}
+@@ -133,6 +159,57 @@
+         profile={profile}
+       />
+ 
++      {/* Floating Quick Action Widget for quick Command Palette & Terminal access */}
++      <div className="fixed bottom-6 right-6 z-30 hidden sm:flex items-center gap-2 p-1.5 rounded-2xl bg-white/90 dark:bg-[#3A2F26]/90 backdrop-blur-md border border-[#E4DBCB]/80 dark:border-[#4A3C31]/80 shadow-lg">
++        <button
++          id="floating-cmd-palette-btn"
++          onClick={() => setIsCommandPaletteOpen(true)}
++          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#EFE6D5] dark:bg-[#4A3C31] hover:bg-[#E4DBCB] dark:hover:bg-[#5C4B3A] text-[#5C4B3A] dark:text-[#D3C6AF] text-xs font-mono transition-colors"
++          title="Open Command Palette (Cmd+K)"
++        >
++          <Command className="w-3.5 h-3.5 text-[#CC9A24]" />
++          <span>Cmd+K</span>
++        </button>
++
++        <button
++          id="floating-terminal-btn"
++          onClick={() => setIsTerminalOpen(true)}
++          className="p-2 rounded-xl text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/60 transition-colors"
++          title="Open CLI Terminal"
++        >
++          <Terminal className="w-4 h-4" />
++        </button>
++      </div>
++
++      {/* Command Palette Modal */}
++      <CommandPalette
++        isOpen={isCommandPaletteOpen}
++        onClose={() => setIsCommandPaletteOpen(false)}
++        profile={profile}
++        isDark={isDark}
++        onToggleTheme={handleToggleTheme}
++        onOpenResume={() => setIsResumeOpen(true)}
++        onOpenCustomizer={() => setIsCustomizerOpen(true)}
++        onOpenTerminal={() => setIsTerminalOpen(true)}
++        onSelectProject={(project) => setActiveModalProject(project)}
++      />
++
++      {/* Interactive Developer Terminal Modal */}
++      <TerminalModal
++        isOpen={isTerminalOpen}
++        onClose={() => setIsTerminalOpen(false)}
++        profile={profile}
++        onOpenResume={() => setIsResumeOpen(true)}
++        onToggleTheme={handleToggleTheme}
++        onSelectProject={(project) => setActiveModalProject(project)}
++      />
++
++      {/* Direct Project Deep Dive Modal */}
++      <ProjectModal
++        project={activeModalProject}
++        onClose={() => setActiveModalProject(null)}
++      />
++
+       {/* Full Resume View & Print Modal */}
+       <ResumeModal
+         isOpen={isResumeOpen}
+diff -ruN a2/src/components/About.tsx b2/src/components/About.tsx
+--- a2/src/components/About.tsx	2026-08-29 14:40:37.949376383 +0000
++++ b2/src/components/About.tsx	2026-08-29 14:40:37.953336700 +0000
+@@ -21,23 +21,23 @@
+ export const About: React.FC<AboutProps> = ({ profile, onOpenResume }) => {
+   const coreValues = [
+     {
+-      title: 'Scalable Architecture',
+-      description: 'Designing resilient microservices and decoupled frontend layers that sustain exponential traffic growth gracefully.',
++      title: 'Solve real problems first',
++      description: 'Off-Campus Hub exists because finding housing near FUTA was genuinely painful \u2014 I build things people around me actually need.',
+       icon: <Cpu className="w-5 h-5 text-[#CC9A24]" />
+     },
+     {
+-      title: 'Type Safety & Quality',
+-      description: 'Strict typing with TypeScript, deterministic state modeling, and automated test pipelines that stop bugs before production.',
++      title: 'Ship the whole thing',
++      description: 'From database schema to production deployment, I handle the entire stack solo rather than stopping at a prototype.',
+       icon: <ShieldCheck className="w-5 h-5 text-emerald-500" />
+     },
+     {
+-      title: 'Performance-First UI',
+-      description: 'Obsession with fast load times, zero cumulative layout shifts, smooth 60fps animations, and accessible ARIA compliance.',
++      title: 'Keep it clean and fast',
++      description: 'Straightforward, well-organized code and responsive interfaces that work well on the low-end devices most of my users actually have.',
+       icon: <Zap className="w-5 h-5 text-amber-500" />
+     },
+     {
+-      title: 'Mentorship & Culture',
+-      description: 'Championing constructive code reviews, comprehensive technical documentation, and empowering team members to excel.',
++      title: 'Learn by building',
++      description: 'Picking up Supabase, PWA packaging, and AI integrations as I need them for real projects, not in isolation.',
+       icon: <Users className="w-5 h-5 text-purple-500" />
+     }
+   ];
+diff -ruN a2/src/components/CommandPalette.tsx b2/src/components/CommandPalette.tsx
+--- a2/src/components/CommandPalette.tsx	1970-01-01 00:00:00.000000000 +0000
++++ b2/src/components/CommandPalette.tsx	2026-08-29 14:40:37.955144876 +0000
+@@ -0,0 +1,350 @@
++import React, { useState, useEffect, useRef } from 'react';
++import { 
++  Search, 
++  Command, 
++  FileText, 
++  Moon, 
++  Sun, 
++  Sliders, 
++  Copy, 
++  ExternalLink, 
++  Layers, 
++  Terminal, 
++  FolderGit2, 
++  Sparkles, 
++  Check, 
++  X,
++  ArrowRight,
++  User,
++  Zap,
++  Briefcase,
++  Mail
++} from 'lucide-react';
++import { ProfileData, Project } from '../types';
++
++interface CommandPaletteProps {
++  isOpen: boolean;
++  onClose: () => void;
++  profile: ProfileData;
++  isDark: boolean;
++  onToggleTheme: () => void;
++  onOpenResume: () => void;
++  onOpenCustomizer: () => void;
++  onOpenTerminal: () => void;
++  onSelectProject: (project: Project) => void;
++}
++
++export const CommandPalette: React.FC<CommandPaletteProps> = ({
++  isOpen,
++  onClose,
++  profile,
++  isDark,
++  onToggleTheme,
++  onOpenResume,
++  onOpenCustomizer,
++  onOpenTerminal,
++  onSelectProject,
++}) => {
++  const [query, setQuery] = useState('');
++  const [selectedIndex, setSelectedIndex] = useState(0);
++  const [copiedNotification, setCopiedNotification] = useState<string | null>(null);
++  const inputRef = useRef<HTMLInputElement>(null);
++  const listRef = useRef<HTMLDivElement>(null);
++
++  useEffect(() => {
++    if (isOpen) {
++      setQuery('');
++      setSelectedIndex(0);
++      setTimeout(() => {
++        inputRef.current?.focus();
++      }, 50);
++    }
++  }, [isOpen]);
++
++  // Define commands list
++  const navigationItems = [
++    {
++      id: 'nav-about',
++      title: 'About & Principles',
++      description: 'Navigate to biography, core values, and engineering background',
++      icon: <User className="w-4 h-4 text-[#CC9A24]" />,
++      category: 'Navigation',
++      action: () => {
++        onClose();
++        document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
++      },
++    },
++    {
++      id: 'nav-projects',
++      title: 'Projects Showcase',
++      description: 'Explore full-stack applications, AI architectures, and cloud services',
++      icon: <FolderGit2 className="w-4 h-4 text-[#CC9A24]" />,
++      category: 'Navigation',
++      action: () => {
++        onClose();
++        document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' });
++      },
++    },
++    {
++      id: 'nav-skills',
++      title: 'Skills & Tech Stack',
++      description: 'View categorized technical capabilities, frameworks, and proficiencies',
++      icon: <Zap className="w-4 h-4 text-amber-500" />,
++      category: 'Navigation',
++      action: () => {
++        onClose();
++        document.getElementById('skills')?.scrollIntoView({ behavior: 'smooth' });
++      },
++    },
++    {
++      id: 'nav-experience',
++      title: 'Career & Education',
++      description: 'Review full work experience timeline and university credentials',
++      icon: <Briefcase className="w-4 h-4 text-emerald-500" />,
++      category: 'Navigation',
++      action: () => {
++        onClose();
++        document.getElementById('experience')?.scrollIntoView({ behavior: 'smooth' });
++      },
++    },
++    {
++      id: 'nav-contact',
++      title: 'Contact & Inquiry',
++      description: 'Send a project inquiry or connect via social platforms',
++      icon: <Mail className="w-4 h-4 text-[#A8432F]" />,
++      category: 'Navigation',
++      action: () => {
++        onClose();
++        document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
++      },
++    },
++  ];
++
++  const actionItems = [
++    {
++      id: 'action-resume',
++      title: 'View & Download Resume',
++      description: 'Open clean, printable resume PDF with complete achievements',
++      icon: <FileText className="w-4 h-4 text-[#CC9A24]" />,
++      category: 'Actions',
++      action: () => {
++        onClose();
++        onOpenResume();
++      },
++    },
++    {
++      id: 'action-terminal',
++      title: 'Open Interactive CLI Terminal',
++      description: 'Launch developer terminal to run commands and query profile data',
++      icon: <Terminal className="w-4 h-4 text-emerald-500" />,
++      category: 'Actions',
++      action: () => {
++        onClose();
++        onOpenTerminal();
++      },
++    },
++    {
++      id: 'action-theme',
++      title: isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode',
++      description: isDark ? 'Activate clean high-contrast light theme' : 'Activate sleek dark mode theme',
++      icon: isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-[#5C4B3A]" />,
++      category: 'Actions',
++      action: () => {
++        onToggleTheme();
++        onClose();
++      },
++    },
++    {
++      id: 'action-customize',
++      title: 'Customize Portfolio Content',
++      description: 'Edit personal information, bio, stats, and projects in real-time',
++      icon: <Sliders className="w-4 h-4 text-[#CC9A24]" />,
++      category: 'Actions',
++      action: () => {
++        onClose();
++        onOpenCustomizer();
++      },
++    },
++    {
++      id: 'action-copy-email',
++      title: 'Copy Email Address',
++      description: profile.email,
++      icon: <Copy className="w-4 h-4 text-sky-500" />,
++      category: 'Actions',
++      action: () => {
++        navigator.clipboard.writeText(profile.email);
++        setCopiedNotification('Email address copied to clipboard!');
++        setTimeout(() => setCopiedNotification(null), 2000);
++      },
++    },
++  ];
++
++  const projectItems = profile.projects.map((project) => ({
++    id: `project-${project.id}`,
++    title: project.title,
++    description: `${project.category} • ${project.tags.slice(0, 3).join(', ')}`,
++    icon: <Layers className="w-4 h-4 text-[#D9A62E]" />,
++    category: 'Projects',
++    action: () => {
++      onClose();
++      onSelectProject(project);
++    },
++  }));
++
++  const allItems = [...navigationItems, ...actionItems, ...projectItems];
++
++  const filteredItems = allItems.filter((item) => {
++    const q = query.toLowerCase().trim();
++    if (!q) return true;
++    return (
++      item.title.toLowerCase().includes(q) ||
++      item.description.toLowerCase().includes(q) ||
++      item.category.toLowerCase().includes(q)
++    );
++  });
++
++  // Handle keyboard events
++  const handleKeyDown = (e: React.KeyboardEvent) => {
++    if (e.key === 'ArrowDown') {
++      e.preventDefault();
++      setSelectedIndex((prev) => (prev < filteredItems.length - 1 ? prev + 1 : 0));
++    } else if (e.key === 'ArrowUp') {
++      e.preventDefault();
++      setSelectedIndex((prev) => (prev > 0 ? prev - 1 : filteredItems.length - 1));
++    } else if (e.key === 'Enter') {
++      e.preventDefault();
++      if (filteredItems[selectedIndex]) {
++        filteredItems[selectedIndex].action();
++      }
++    } else if (e.key === 'Escape') {
++      onClose();
++    }
++  };
++
++  useEffect(() => {
++    // Scroll active item into view
++    const activeEl = listRef.current?.children[selectedIndex] as HTMLElement;
++    if (activeEl) {
++      activeEl.scrollIntoView({ block: 'nearest' });
++    }
++  }, [selectedIndex]);
++
++  if (!isOpen) return null;
++
++  return (
++    <div
++      id="command-palette-backdrop"
++      className="fixed inset-0 z-50 flex items-start justify-center pt-20 sm:pt-28 px-4 bg-[#2A211C]/60 backdrop-blur-sm animate-in fade-in duration-150"
++      onClick={onClose}
++    >
++      <div
++        id="command-palette-modal"
++        onClick={(e) => e.stopPropagation()}
++        onKeyDown={handleKeyDown}
++        className="w-full max-w-xl bg-white dark:bg-[#3A2F26] rounded-2xl border border-[#E4DBCB] dark:border-[#4A3C31] shadow-2xl overflow-hidden flex flex-col max-h-[80vh] transition-all"
++      >
++        {/* Search Header */}
++        <div className="flex items-center px-4 py-3.5 border-b border-[#E4DBCB] dark:border-[#4A3C31] gap-3">
++          <Search className="w-5 h-5 text-[#B9A98C] shrink-0" />
++          <input
++            ref={inputRef}
++            id="command-palette-input"
++            type="text"
++            placeholder="Type a command, search project, or jump to section..."
++            value={query}
++            onChange={(e) => {
++              setQuery(e.target.value);
++              setSelectedIndex(0);
++            }}
++            className="w-full text-sm bg-transparent text-[#3A2F26] dark:text-white placeholder:text-[#B9A98C] focus:outline-none"
++          />
++          {query ? (
++            <button
++              onClick={() => setQuery('')}
++              className="p-1 rounded-md text-[#B9A98C] hover:text-[#7A6B58] dark:hover:text-[#E4DBCB]"
++            >
++              <X className="w-4 h-4" />
++            </button>
++          ) : (
++            <kbd className="hidden sm:inline-block px-2 py-0.5 text-[11px] font-mono text-[#B9A98C] bg-[#EFE6D5] dark:bg-[#4A3C31] border border-[#E4DBCB] dark:border-[#5C4B3A] rounded-md">
++              ESC
++            </kbd>
++          )}
++        </div>
++
++        {/* Copied Notification */}
++        {copiedNotification && (
++          <div className="px-4 py-2 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-xs flex items-center gap-2 border-b border-emerald-200 dark:border-emerald-800">
++            <Check className="w-3.5 h-3.5" />
++            <span>{copiedNotification}</span>
++          </div>
++        )}
++
++        {/* Results List */}
++        <div
++          ref={listRef}
++          id="command-palette-results"
++          className="flex-1 overflow-y-auto p-2 space-y-1 max-h-96 scrollbar-none"
++        >
++          {filteredItems.length === 0 ? (
++            <div className="py-10 text-center text-[#9C8A6E] dark:text-[#B9A98C]">
++              <Command className="w-8 h-8 mx-auto mb-2 opacity-40" />
++              <p className="text-sm font-medium">No matching commands found</p>
++              <p className="text-xs text-[#B9A98C] mt-0.5">Try typing "projects", "resume", or "skills"</p>
++            </div>
++          ) : (
++            filteredItems.map((item, index) => {
++              const isSelected = index === selectedIndex;
++              return (
++                <button
++                  key={item.id}
++                  id={`command-item-${item.id}`}
++                  onClick={item.action}
++                  onMouseEnter={() => setSelectedIndex(index)}
++                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-left transition-colors ${
++                    isSelected
++                      ? 'bg-[#F6E9C4] dark:bg-[#3D2F12]/50 text-[#3A2F26] dark:text-white'
++                      : 'text-[#5C4B3A] dark:text-[#D3C6AF] hover:bg-[#F7F2E9] dark:hover:bg-[#4A3C31]/50'
++                  }`}
++                >
++                  <div className="flex items-center gap-3 min-w-0">
++                    <div className={`p-2 rounded-lg ${isSelected ? 'bg-[#F0DDA0] dark:bg-[#6E4C11]/60' : 'bg-[#EFE6D5] dark:bg-[#4A3C31]'}`}>
++                      {item.icon}
++                    </div>
++                    <div className="min-w-0">
++                      <div className="text-xs sm:text-sm font-semibold truncate flex items-center gap-2">
++                        <span>{item.title}</span>
++                        <span className="text-[10px] uppercase font-mono px-1.5 py-0.2 rounded bg-[#EFE6D5] dark:bg-[#4A3C31] text-[#B9A98C]">
++                          {item.category}
++                        </span>
++                      </div>
++                      <div className="text-[11px] sm:text-xs text-[#9C8A6E] dark:text-[#B9A98C] truncate">
++                        {item.description}
++                      </div>
++                    </div>
++                  </div>
++
++                  <ArrowRight
++                    className={`w-4 h-4 text-[#CC9A24] shrink-0 ml-2 transition-transform ${
++                      isSelected ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-1'
++                    }`}
++                  />
++                </button>
++              );
++            })
++          )}
++        </div>
++
++        {/* Footer shortcuts helper */}
++        <div className="px-4 py-2.5 border-t border-[#EFE6D5] dark:border-[#4A3C31]/80 bg-[#F7F2E9] dark:bg-[#2A211C]/40 text-[11px] text-[#B9A98C] flex items-center justify-between font-mono">
++          <div className="flex items-center gap-3">
++            <span>↑↓ Navigate</span>
++            <span>↵ Select</span>
++            <span>Esc Close</span>
++          </div>
++          <span className="hidden sm:inline">Press ⌘K anytime</span>
++        </div>
++      </div>
++    </div>
++  );
++};
+diff -ruN a2/src/components/Hero.tsx b2/src/components/Hero.tsx
+--- a2/src/components/Hero.tsx	2026-08-29 14:40:37.949703720 +0000
++++ b2/src/components/Hero.tsx	2026-08-29 14:40:37.954822862 +0000
+@@ -1,4 +1,4 @@
+-import React, { useState } from 'react';
++import React, { useState, useEffect } from 'react';
+ import { 
+   ArrowRight, 
+   Download, 
+@@ -14,17 +14,48 @@
+   Code2,
+   Briefcase,
+   Layers,
+-  Award
++  Award,
++  Terminal,
++  Clock,
++  Command,
++  Activity,
++  Cpu
+ } from 'lucide-react';
+ import { ProfileData } from '../types';
+ 
+ interface HeroProps {
+   profile: ProfileData;
+   onOpenResume: () => void;
++  onOpenTerminal: () => void;
++  onOpenCommandPalette: () => void;
+ }
+ 
+-export const Hero: React.FC<HeroProps> = ({ profile, onOpenResume }) => {
++export const Hero: React.FC<HeroProps> = ({
++  profile,
++  onOpenResume,
++  onOpenTerminal,
++  onOpenCommandPalette,
++}) => {
+   const [copiedEmail, setCopiedEmail] = useState(false);
++  const [currentTime, setCurrentTime] = useState<string>('');
++  const [activeCodeTab, setActiveCodeTab] = useState<'stack' | 'architecture' | 'mission'>('stack');
++
++  // Clock effect for live local time
++  useEffect(() => {
++    const updateTime = () => {
++      const now = new Date();
++      const timeStr = now.toLocaleTimeString('en-GB', {
++        timeZone: 'Africa/Lagos',
++        hour: '2-digit',
++        minute: '2-digit',
++        second: '2-digit',
++      });
++      setCurrentTime(timeStr);
++    };
++    updateTime();
++    const interval = setInterval(updateTime, 1000);
++    return () => clearInterval(interval);
++  }, []);
+ 
+   const handleCopyEmail = () => {
+     navigator.clipboard.writeText(profile.email);
+@@ -48,29 +79,45 @@
+   };
+ 
+   return (
+-    <section id="hero" className="relative pt-28 sm:pt-36 pb-16 sm:pb-24 overflow-hidden">
+-      {/* Subtle Background Glows (Accessible & Anti-Slop) */}
+-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[320px] bg-[#CC9A24]/10 dark:bg-[#CC9A24]/15 blur-3xl rounded-full pointer-events-none -z-10" />
++    <section id="hero" className="relative pt-28 sm:pt-36 pb-16 sm:pb-24 overflow-hidden bg-grid-pattern">
++      {/* Ambient background glows */}
++      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[340px] bg-[#CC9A24]/10 dark:bg-[#CC9A24]/15 blur-[120px] rounded-full pointer-events-none -z-10" />
++      <div className="absolute top-1/3 right-10 w-[350px] h-[350px] bg-sky-500/10 dark:bg-sky-500/10 blur-[100px] rounded-full pointer-events-none -z-10" />
+ 
+       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+         <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16">
+           
+-          {/* Left Column: Bio / Pitch */}
++          {/* Left Column: Introduction & Call to Actions */}
+           <div className="flex-1 text-center lg:text-left">
+-            {/* Status Badge */}
+-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-400 text-xs font-semibold tracking-wide mb-6 shadow-xs">
+-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+-              <span>{profile.availability}</span>
++            
++            {/* Status & Availability Pills */}
++            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 mb-6">
++              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-300 text-xs font-semibold tracking-wide shadow-2xs">
++                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
++                <span>{profile.availability}</span>
++              </div>
++
++              <button
++                onClick={onOpenCommandPalette}
++                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#EFE6D5] dark:bg-[#4A3C31]/80 border border-[#E4DBCB] dark:border-[#5C4B3A] text-[#7A6B58] dark:text-[#D3C6AF] text-xs font-mono hover:bg-[#E4DBCB] dark:hover:bg-[#5C4B3A] transition-colors"
++                title="Quick command palette"
++              >
++                <Command className="w-3 h-3 text-[#CC9A24]" />
++                <span>Cmd+K / Ctrl+K</span>
++              </button>
+             </div>
+ 
+-            {/* Main Greeting & Name */}
+-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-[#3A2F26] dark:text-white tracking-tight leading-[1.15] mb-4">
+-              Hi, I'm <span className="text-[#B9861F] dark:text-[#D9A62E]">{profile.name}</span>
++            {/* Main Heading */}
++            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-[#3A2F26] dark:text-white tracking-tight leading-[1.12] mb-4">
++              Building scalable systems with{' '}
++              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#B9861F] via-[#CC9A24] to-sky-500 dark:from-[#D9A62E] dark:via-[#DFB94A] dark:to-sky-400">
++                precision & speed.
++              </span>
+             </h1>
+ 
+-            {/* Professional Title */}
+-            <p className="text-xl sm:text-2xl font-semibold text-[#5C4B3A] dark:text-[#E4DBCB] mb-4 tracking-tight">
+-              {profile.title}
++            {/* Professional Subheading */}
++            <p className="text-lg sm:text-xl font-medium text-[#5C4B3A] dark:text-[#E4DBCB] mb-4 tracking-tight">
++              {profile.name} — <span className="text-[#B9861F] dark:text-[#D9A62E] font-semibold">{profile.title}</span>
+             </p>
+ 
+             {/* Headline / Summary */}
+@@ -78,17 +125,29 @@
+               {profile.headline}
+             </p>
+ 
+-            {/* Location & Quick Contact */}
++            {/* Location, Local Time & Copy Email */}
+             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 text-xs sm:text-sm text-[#7A6B58] dark:text-[#B9A98C] mb-8">
+               <div className="inline-flex items-center gap-1.5">
+                 <MapPin className="w-4 h-4 text-[#CC9A24]" />
+                 <span>{profile.location}</span>
+               </div>
++              
++              {currentTime && (
++                <>
++                  <span className="text-[#D3C6AF] dark:text-[#5C4B3A]">•</span>
++                  <div className="inline-flex items-center gap-1.5 font-mono text-xs text-[#9C8A6E] dark:text-[#B9A98C]">
++                    <Clock className="w-3.5 h-3.5 text-sky-500" />
++                    <span>{currentTime} GMT</span>
++                  </div>
++                </>
++              )}
++
+               <span className="hidden sm:inline text-[#D3C6AF] dark:text-[#5C4B3A]">•</span>
++
+               <button
+                 id="hero-copy-email-btn"
+                 onClick={handleCopyEmail}
+-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#EFE6D5] dark:bg-[#4A3C31] hover:bg-[#E4DBCB] dark:hover:bg-[#5C4B3A] text-[#5C4B3A] dark:text-[#D3C6AF] font-mono text-xs transition-colors border border-[#E4DBCB] dark:border-[#5C4B3A]"
++                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#EFE6D5] dark:bg-[#4A3C31] hover:bg-[#E4DBCB] dark:hover:bg-[#5C4B3A] text-[#5C4B3A] dark:text-[#D3C6AF] font-mono text-xs transition-colors border border-[#E4DBCB] dark:border-[#5C4B3A]"
+                 title="Click to copy email address"
+               >
+                 {copiedEmail ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+@@ -96,12 +155,12 @@
+               </button>
+             </div>
+ 
+-            {/* Primary Action Buttons */}
++            {/* Primary Actions */}
+             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 sm:gap-4 mb-10">
+               <a
+                 id="hero-view-projects-btn"
+                 href="#projects"
+-                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm text-white bg-[#B9861F] hover:bg-[#A2731A] active:bg-[#8A6015] shadow-xs hover:shadow-md transition-all group"
++                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm text-white bg-[#B9861F] hover:bg-[#A2731A] active:bg-[#8A6015] shadow-sm hover:shadow-md transition-all group"
+               >
+                 <span>Explore Projects</span>
+                 <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+@@ -110,19 +169,30 @@
+               <a
+                 id="hero-contact-btn"
+                 href="#contact"
+-                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm text-[#4A3C31] dark:text-[#EFE6D5] bg-white dark:bg-[#4A3C31] hover:bg-[#F7F2E9] dark:hover:bg-[#5C4B3A] border border-[#D3C6AF] dark:border-[#5C4B3A] shadow-xs transition-all"
++                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm text-[#4A3C31] dark:text-[#EFE6D5] bg-white dark:bg-[#4A3C31] hover:bg-[#F7F2E9] dark:hover:bg-[#5C4B3A] border border-[#D3C6AF] dark:border-[#5C4B3A] shadow-2xs transition-all"
+               >
+                 <Mail className="w-4 h-4 text-[#CC9A24]" />
+                 <span>Get in Touch</span>
+               </a>
+ 
+               <button
++                id="hero-terminal-launch-btn"
++                onClick={onOpenTerminal}
++                className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold text-sm text-emerald-600 dark:text-emerald-400 bg-emerald-50/80 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 border border-emerald-200 dark:border-emerald-800/60 transition-all font-mono"
++                title="Launch interactive developer CLI"
++              >
++                <Terminal className="w-4 h-4" />
++                <span>Launch CLI</span>
++              </button>
++
++              <button
+                 id="hero-cv-btn"
+                 onClick={onOpenResume}
+-                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm text-[#7A6B58] dark:text-[#D3C6AF] hover:text-[#3A2F26] dark:hover:text-white hover:bg-[#EFE6D5] dark:hover:bg-[#4A3C31] transition-colors border border-transparent hover:border-[#E4DBCB] dark:hover:border-[#5C4B3A]"
++                className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold text-sm text-[#7A6B58] dark:text-[#D3C6AF] hover:text-[#3A2F26] dark:hover:text-white hover:bg-[#EFE6D5] dark:hover:bg-[#4A3C31] transition-colors"
++                title="View clean resume PDF"
+               >
+                 <Download className="w-4 h-4" />
+-                <span>View CV</span>
++                <span>CV</span>
+               </button>
+             </div>
+ 
+@@ -139,7 +209,7 @@
+                   target={social.platform === 'email' ? '_self' : '_blank'}
+                   rel="noreferrer noopener"
+                   aria-label={social.label}
+-                  className="p-2.5 rounded-xl text-[#7A6B58] dark:text-[#D3C6AF] bg-[#EFE6D5] hover:bg-[#E4DBCB]/80 dark:bg-[#4A3C31] dark:hover:bg-[#5C4B3A] border border-[#E4DBCB] dark:border-[#5C4B3A] transition-all hover:scale-105 hover:text-[#B9861F] dark:hover:text-[#D9A62E]"
++                  className="p-2.5 rounded-xl text-[#7A6B58] dark:text-[#D3C6AF] bg-white dark:bg-[#3A2F26] hover:bg-[#EFE6D5] dark:hover:bg-[#4A3C31] border border-[#E4DBCB] dark:border-[#4A3C31] shadow-2xs transition-all hover:scale-105 hover:text-[#B9861F] dark:hover:text-[#D9A62E]"
+                   title={`${social.label} (${social.username})`}
+                 >
+                   {getSocialIcon(social.platform)}
+@@ -148,72 +218,161 @@
+             </div>
+           </div>
+ 
+-          {/* Right Column: Hero Visual Card with Stats */}
++          {/* Right Column: Modern Bento Card with Live Code / Architecture Preview */}
+           <div className="w-full max-w-md lg:max-w-lg">
+-            <div className="relative rounded-2xl bg-white dark:bg-[#3A2F26] p-6 sm:p-8 border border-[#E4DBCB] dark:border-[#4A3C31] shadow-md">
++            <div className="relative rounded-3xl bg-white/90 dark:bg-[#3A2F26]/90 backdrop-blur-xl p-6 sm:p-7 border border-[#E4DBCB]/90 dark:border-[#4A3C31] shadow-xl space-y-6">
++              
+               {/* Profile Card Header */}
+-              <div className="flex items-center gap-4 pb-6 border-b border-[#EFE6D5] dark:border-[#4A3C31]">
+-                <div className="relative">
+-                  <img
+-                    src={profile.avatarUrl}
+-                    alt={profile.name}
+-                    className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover ring-2 ring-[#CC9A24]/30 shadow-xs"
+-                    referrerPolicy="no-referrer"
+-                  />
+-                  <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-[#3A2F26] flex items-center justify-center">
+-                    <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
+-                  </div>
+-                </div>
+-                <div>
+-                  <div className="text-base font-bold text-[#3A2F26] dark:text-white">
+-                    {profile.name}
+-                  </div>
+-                  <div className="text-xs text-[#B9861F] dark:text-[#D9A62E] font-medium">
+-                    {profile.title}
+-                  </div>
+-                  <div className="flex items-center gap-1.5 text-xs text-[#9C8A6E] dark:text-[#B9A98C] mt-1">
+-                    <MapPin className="w-3 h-3" />
+-                    <span>{profile.location}</span>
++              <div className="flex items-center justify-between pb-5 border-b border-[#EFE6D5] dark:border-[#4A3C31]">
++                <div className="flex items-center gap-3.5">
++                  <div className="relative">
++                    <img
++                      src={profile.avatarUrl}
++                      alt={profile.name}
++                      className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl object-cover ring-2 ring-[#CC9A24]/30 shadow-sm"
++                      referrerPolicy="no-referrer"
++                    />
++                    <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-[#3A2F26] flex items-center justify-center">
++                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
++                    </div>
++                  </div>
++                  <div>
++                    <div className="text-base font-bold text-[#3A2F26] dark:text-white flex items-center gap-1.5">
++                      <span>{profile.name}</span>
++                    </div>
++                    <div className="text-xs text-[#B9861F] dark:text-[#D9A62E] font-medium">
++                      {profile.title}
++                    </div>
++                    <div className="text-[11px] text-[#B9A98C] font-mono mt-0.5">
++                      Akure, Nigeria • WAT
++                    </div>
+                   </div>
+                 </div>
++
++                <button
++                  onClick={onOpenTerminal}
++                  className="p-2.5 rounded-xl bg-[#EFE6D5] dark:bg-[#4A3C31] hover:bg-[#F6E9C4] dark:hover:bg-[#3D2F12]/60 hover:text-[#B9861F] dark:hover:text-[#D9A62E] text-[#7A6B58] dark:text-[#D3C6AF] transition-colors"
++                  title="Open terminal window"
++                >
++                  <Terminal className="w-4 h-4" />
++                </button>
++              </div>
++
++              {/* Code Snippet / Architecture Widget */}
++              <div className="rounded-2xl bg-[#2A211C] text-[#E4DBCB] border border-[#4A3C31]/90 overflow-hidden text-xs font-mono shadow-inner">
++                {/* Tab selector */}
++                <div className="flex items-center justify-between px-3 py-2 bg-[#3A2F26] border-b border-[#4A3C31]">
++                  <div className="flex items-center gap-1.5">
++                    <button
++                      onClick={() => setActiveCodeTab('stack')}
++                      className={`px-2.5 py-1 rounded-md transition-colors ${
++                        activeCodeTab === 'stack'
++                          ? 'bg-[#4A3C31] text-[#DFB94A] font-bold'
++                          : 'text-[#B9A98C] hover:text-white'
++                      }`}
++                    >
++                      stack.ts
++                    </button>
++                    <button
++                      onClick={() => setActiveCodeTab('architecture')}
++                      className={`px-2.5 py-1 rounded-md transition-colors ${
++                        activeCodeTab === 'architecture'
++                          ? 'bg-[#4A3C31] text-[#DFB94A] font-bold'
++                          : 'text-[#B9A98C] hover:text-white'
++                      }`}
++                    >
++                      architecture.json
++                    </button>
++                    <button
++                      onClick={() => setActiveCodeTab('mission')}
++                      className={`px-2.5 py-1 rounded-md transition-colors ${
++                        activeCodeTab === 'mission'
++                          ? 'bg-[#4A3C31] text-[#DFB94A] font-bold'
++                          : 'text-[#B9A98C] hover:text-white'
++                      }`}
++                    >
++                      craft.md
++                    </button>
++                  </div>
++                  <span className="text-[10px] text-emerald-400 flex items-center gap-1">
++                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
++                    live
++                  </span>
++                </div>
++
++                {/* Tab content */}
++                <div className="p-4 leading-relaxed overflow-x-auto scrollbar-none">
++                  {activeCodeTab === 'stack' && (
++                    <div className="space-y-1">
++                      <p className="text-[#9C8A6E]">// Core technical stack</p>
++                      <p><span className="text-purple-400">const</span> <span className="text-sky-300">coreStack</span> = {'{'}</p>
++                      <p className="pl-4">frontend: <span className="text-emerald-300">['React', 'Next.js', 'Vanilla JS', 'Tailwind']</span>,</p>
++                      <p className="pl-4">backend: <span className="text-emerald-300">['Node.js', 'Express', 'MongoDB', 'Mongoose']</span>,</p>
++                      <p className="pl-4">auth_media: <span className="text-emerald-300">['JWT', 'Google OAuth', 'Cloudinary']</span>,</p>
++                      <p className="pl-4">deploy: <span className="text-emerald-300">['Render', 'Vercel', 'MongoDB Atlas']</span>,</p>
++                      <p>{'}'};</p>
++                    </div>
++                  )}
++
++                  {activeCodeTab === 'architecture' && (
++                    <div className="space-y-1">
++                      <p className="text-[#9C8A6E]">// Where things stand</p>
++                      <p><span className="text-purple-400">export const</span> <span className="text-sky-300">status</span> = {'{'}</p>
++                      <p className="pl-4">liveSites: <span className="text-amber-300">2</span>,</p>
++                      <p className="pl-4">soloBuilt: <span className="text-amber-300">true</span>,</p>
++                      <p className="pl-4">currentlyLearning: <span className="text-amber-300">"Supabase, AI integrations"</span>,</p>
++                      <p className="pl-4">availability: <span className="text-amber-300">"Open to work"</span>,</p>
++                      <p>{'}'};</p>
++                    </div>
++                  )}
++
++                  {activeCodeTab === 'mission' && (
++                    <div className="space-y-1">
++                      <p className="text-[#9C8A6E]">## How I work</p>
++                      <p className="text-[#D3C6AF]">- Solve real problems people around me actually have</p>
++                      <p className="text-[#D3C6AF]">- Ship the whole stack solo, end to end</p>
++                      <p className="text-[#D3C6AF]">- Learn new tools by building with them, not in isolation</p>
++                    </div>
++                  )}
++                </div>
+               </div>
+ 
+               {/* Stats Matrix */}
+-              <div className="grid grid-cols-2 gap-3 sm:gap-4 pt-6">
+-                <div className="p-3.5 rounded-xl bg-[#F7F2E9] dark:bg-[#4A3C31]/60 border border-[#EFE6D5] dark:border-[#4A3C31]">
+-                  <div className="flex items-center gap-2 text-[#B9861F] dark:text-[#D9A62E] mb-1">
+-                    <Briefcase className="w-4 h-4" />
+-                    <span className="text-xs font-semibold text-[#9C8A6E] dark:text-[#B9A98C]">Experience</span>
++              <div className="grid grid-cols-2 gap-3 pt-1">
++                <div className="p-3.5 rounded-2xl bg-[#F7F2E9] dark:bg-[#4A3C31]/50 border border-[#EFE6D5] dark:border-[#4A3C31]">
++                  <div className="flex items-center gap-1.5 text-[#B9861F] dark:text-[#D9A62E] mb-1">
++                    <Briefcase className="w-3.5 h-3.5" />
++                    <span className="text-[11px] font-semibold text-[#9C8A6E] dark:text-[#B9A98C] uppercase tracking-wider">Experience</span>
+                   </div>
+                   <div className="text-2xl font-extrabold text-[#3A2F26] dark:text-white">
+                     {profile.stats.yearsExperience}+ <span className="text-xs font-normal text-[#9C8A6E] dark:text-[#B9A98C]">Years</span>
+                   </div>
+                 </div>
+ 
+-                <div className="p-3.5 rounded-xl bg-[#F7F2E9] dark:bg-[#4A3C31]/60 border border-[#EFE6D5] dark:border-[#4A3C31]">
+-                  <div className="flex items-center gap-2 text-[#B9861F] dark:text-[#D9A62E] mb-1">
+-                    <Layers className="w-4 h-4" />
+-                    <span className="text-xs font-semibold text-[#9C8A6E] dark:text-[#B9A98C]">Projects</span>
++                <div className="p-3.5 rounded-2xl bg-[#F7F2E9] dark:bg-[#4A3C31]/50 border border-[#EFE6D5] dark:border-[#4A3C31]">
++                  <div className="flex items-center gap-1.5 text-[#B9861F] dark:text-[#D9A62E] mb-1">
++                    <Layers className="w-3.5 h-3.5" />
++                    <span className="text-[11px] font-semibold text-[#9C8A6E] dark:text-[#B9A98C] uppercase tracking-wider">Projects</span>
+                   </div>
+                   <div className="text-2xl font-extrabold text-[#3A2F26] dark:text-white">
+                     {profile.stats.completedProjects}+ <span className="text-xs font-normal text-[#9C8A6E] dark:text-[#B9A98C]">Shipped</span>
+                   </div>
+                 </div>
+ 
+-                <div className="p-3.5 rounded-xl bg-[#F7F2E9] dark:bg-[#4A3C31]/60 border border-[#EFE6D5] dark:border-[#4A3C31]">
+-                  <div className="flex items-center gap-2 text-[#B9861F] dark:text-[#D9A62E] mb-1">
+-                    <Code2 className="w-4 h-4" />
+-                    <span className="text-xs font-semibold text-[#9C8A6E] dark:text-[#B9A98C]">Stack</span>
++                <div className="p-3.5 rounded-2xl bg-[#F7F2E9] dark:bg-[#4A3C31]/50 border border-[#EFE6D5] dark:border-[#4A3C31]">
++                  <div className="flex items-center gap-1.5 text-[#B9861F] dark:text-[#D9A62E] mb-1">
++                    <Code2 className="w-3.5 h-3.5" />
++                    <span className="text-[11px] font-semibold text-[#9C8A6E] dark:text-[#B9A98C] uppercase tracking-wider">Stack</span>
+                   </div>
+                   <div className="text-2xl font-extrabold text-[#3A2F26] dark:text-white">
+                     {profile.stats.codeContributions} <span className="text-xs font-normal text-[#9C8A6E] dark:text-[#B9A98C]">Tools</span>
+                   </div>
+                 </div>
+ 
+-                <div className="p-3.5 rounded-xl bg-[#F7F2E9] dark:bg-[#4A3C31]/60 border border-[#EFE6D5] dark:border-[#4A3C31]">
+-                  <div className="flex items-center gap-2 text-[#B9861F] dark:text-[#D9A62E] mb-1">
+-                    <Award className="w-4 h-4" />
+-                    <span className="text-xs font-semibold text-[#9C8A6E] dark:text-[#B9A98C]">Live sites</span>
++                <div className="p-3.5 rounded-2xl bg-[#F7F2E9] dark:bg-[#4A3C31]/50 border border-[#EFE6D5] dark:border-[#4A3C31]">
++                  <div className="flex items-center gap-1.5 text-[#B9861F] dark:text-[#D9A62E] mb-1">
++                    <Activity className="w-3.5 h-3.5 text-emerald-500" />
++                    <span className="text-[11px] font-semibold text-[#9C8A6E] dark:text-[#B9A98C] uppercase tracking-wider">Live sites</span>
+                   </div>
+                   <div className="text-2xl font-extrabold text-[#3A2F26] dark:text-white">
+                     2 <span className="text-xs font-normal text-[#9C8A6E] dark:text-[#B9A98C]">In Production</span>
+@@ -221,13 +380,6 @@
+                 </div>
+               </div>
+ 
+-              {/* Quick Tech Highlight Strip */}
+-              <div className="mt-5 pt-4 border-t border-[#EFE6D5] dark:border-[#4A3C31] flex items-center justify-between text-xs text-[#9C8A6E] dark:text-[#B9A98C]">
+-                <span className="font-medium">Core Stack:</span>
+-                <span className="font-mono text-[#5C4B3A] dark:text-[#D3C6AF] font-semibold">
+-                  Node.js • Express • MongoDB • React
+-                </span>
+-              </div>
+             </div>
+           </div>
+ 
+diff -ruN a2/src/components/Navbar.tsx b2/src/components/Navbar.tsx
+--- a2/src/components/Navbar.tsx	2026-08-29 14:40:37.949882308 +0000
++++ b2/src/components/Navbar.tsx	2026-08-29 14:40:37.953924670 +0000
+@@ -7,6 +7,8 @@
+   FileText, 
+   Sliders, 
+   Sparkles,
++  Command,
++  Terminal,
+   ArrowUpRight
+ } from 'lucide-react';
+ import { ProfileData } from '../types';
+@@ -17,6 +19,8 @@
+   onToggleTheme: () => void;
+   onOpenResume: () => void;
+   onOpenCustomizer: () => void;
++  onOpenCommandPalette: () => void;
++  onOpenTerminal: () => void;
+ }
+ 
+ export const Navbar: React.FC<NavbarProps> = ({
+@@ -24,7 +28,9 @@
+   isDark,
+   onToggleTheme,
+   onOpenResume,
+-  onOpenCustomizer
++  onOpenCustomizer,
++  onOpenCommandPalette,
++  onOpenTerminal,
+ }) => {
+   const [isScrolled, setIsScrolled] = useState(false);
+   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+@@ -73,30 +79,36 @@
+   return (
+     <header
+       id="main-navbar"
+-      className={`fixed top-0 left-0 right-0 z-40 transition-all duration-200 ${
++      className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
+         isScrolled
+-          ? 'bg-white/85 dark:bg-[#3A2F26]/85 backdrop-blur-md border-b border-[#E4DBCB]/80 dark:border-[#4A3C31]/80 shadow-xs'
+-          : 'bg-transparent'
++          ? 'bg-white/80 dark:bg-[#2A211C]/80 backdrop-blur-md border-b border-[#E4DBCB]/80 dark:border-[#4A3C31]/80 shadow-xs py-2.5'
++          : 'bg-transparent py-4'
+       }`}
+     >
+       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+-        <div className="flex items-center justify-between h-16 sm:h-20">
+-          {/* Logo / Name */}
++        <div className="flex items-center justify-between">
++          
++          {/* Logo / Brand */}
+           <a
+             href="#hero"
+             id="nav-brand-logo"
+             className="flex items-center gap-2.5 text-[#3A2F26] dark:text-white font-bold text-lg sm:text-xl tracking-tight group"
+           >
+-            <div className="w-8 h-8 rounded-lg bg-[#B9861F] dark:bg-[#CC9A24] text-white flex items-center justify-center font-mono font-bold text-sm shadow-xs group-hover:scale-105 transition-transform">
++            <div className="w-8 h-8 rounded-xl bg-[#B9861F] dark:bg-[#CC9A24] text-white flex items-center justify-center font-mono font-bold text-sm shadow-xs group-hover:scale-105 transition-transform">
+               {profile.name.charAt(0)}
+             </div>
+-            <span className="font-semibold text-[#3A2F26] dark:text-white group-hover:text-[#B9861F] dark:group-hover:text-[#D9A62E] transition-colors">
+-              {profile.name}
+-            </span>
++            <div className="flex flex-col">
++              <span className="font-semibold text-[#3A2F26] dark:text-white group-hover:text-[#B9861F] dark:group-hover:text-[#D9A62E] transition-colors leading-none">
++                {profile.name}
++              </span>
++              <span className="text-[10px] font-mono text-[#B9A98C] dark:text-[#9C8A6E] mt-0.5">
++                senior engineer
++              </span>
++            </div>
+           </a>
+ 
+           {/* Desktop Navigation Links */}
+-          <nav className="hidden md:flex items-center gap-1 bg-[#EFE6D5]/70 dark:bg-[#4A3C31]/60 p-1.5 rounded-full border border-[#E4DBCB]/60 dark:border-[#5C4B3A]/60 backdrop-blur-xs">
++          <nav className="hidden md:flex items-center gap-1 bg-[#EFE6D5]/80 dark:bg-[#3A2F26]/80 p-1.5 rounded-full border border-[#E4DBCB]/70 dark:border-[#4A3C31]/70 backdrop-blur-md">
+             {navLinks.map((link) => {
+               const isActive = activeSection === link.id;
+               return (
+@@ -104,10 +116,10 @@
+                   key={link.id}
+                   id={`nav-link-${link.id}`}
+                   onClick={() => handleNavClick(link.href)}
+-                  className={`px-4 py-1.5 text-sm font-medium rounded-full transition-all duration-150 ${
++                  className={`px-4 py-1.5 text-xs sm:text-sm font-medium rounded-full transition-all duration-150 ${
+                     isActive
+-                      ? 'bg-white dark:bg-[#3A2F26] text-[#B9861F] dark:text-[#D9A62E] shadow-xs font-semibold'
+-                      : 'text-[#7A6B58] dark:text-[#D3C6AF] hover:text-[#3A2F26] dark:hover:text-white hover:bg-[#E4DBCB]/40 dark:hover:bg-[#5C4B3A]/40'
++                      ? 'bg-white dark:bg-[#4A3C31] text-[#B9861F] dark:text-[#D9A62E] shadow-2xs font-semibold'
++                      : 'text-[#7A6B58] dark:text-[#D3C6AF] hover:text-[#3A2F26] dark:hover:text-white hover:bg-[#E4DBCB]/50 dark:hover:bg-[#4A3C31]/50'
+                   }`}
+                 >
+                   {link.name}
+@@ -116,46 +128,84 @@
+             })}
+           </nav>
+ 
+-          {/* Actions: Theme Toggle, Resume & Customizer */}
+-          <div className="hidden sm:flex items-center gap-2.5">
++          {/* Right Actions: Command Palette, Terminal, Theme & Resume */}
++          <div className="hidden sm:flex items-center gap-2">
++            
++            {/* Quick Command Palette Button */}
++            <button
++              id="navbar-cmd-palette-btn"
++              onClick={onOpenCommandPalette}
++              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#EFE6D5]/90 dark:bg-[#3A2F26]/90 hover:bg-[#E4DBCB] dark:hover:bg-[#4A3C31] border border-[#E4DBCB] dark:border-[#4A3C31] text-[#7A6B58] dark:text-[#D3C6AF] text-xs font-mono transition-colors"
++              title="Open Command Palette (Cmd+K)"
++            >
++              <Command className="w-3.5 h-3.5 text-[#CC9A24]" />
++              <span>Search</span>
++              <kbd className="text-[10px] px-1 py-0.2 rounded bg-[#E4DBCB]/70 dark:bg-[#4A3C31] text-[#B9A98C] font-sans">
++                ⌘K
++              </kbd>
++            </button>
++
++            {/* Interactive Terminal Trigger */}
++            <button
++              id="navbar-terminal-btn"
++              onClick={onOpenTerminal}
++              aria-label="Open CLI Terminal"
++              className="p-2 rounded-xl text-[#7A6B58] dark:text-[#D3C6AF] hover:text-[#3A2F26] dark:hover:text-white bg-[#EFE6D5]/90 dark:bg-[#3A2F26]/90 hover:bg-[#E4DBCB] dark:hover:bg-[#4A3C31] border border-[#E4DBCB] dark:border-[#4A3C31] transition-colors"
++              title="Open interactive terminal CLI"
++            >
++              <Terminal className="w-4 h-4 text-emerald-500" />
++            </button>
++
++            {/* Theme Toggle */}
+             <button
+               id="theme-toggle-btn"
+               onClick={onToggleTheme}
+               aria-label="Toggle theme"
+-              className="p-2.5 rounded-xl text-[#7A6B58] dark:text-[#D3C6AF] hover:text-[#3A2F26] dark:hover:text-white hover:bg-[#EFE6D5] dark:hover:bg-[#4A3C31] transition-colors border border-transparent hover:border-[#E4DBCB] dark:hover:border-[#5C4B3A]"
++              className="p-2 rounded-xl text-[#7A6B58] dark:text-[#D3C6AF] hover:text-[#3A2F26] dark:hover:text-white bg-[#EFE6D5]/90 dark:bg-[#3A2F26]/90 hover:bg-[#E4DBCB] dark:hover:bg-[#4A3C31] border border-[#E4DBCB] dark:border-[#4A3C31] transition-colors"
+               title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+             >
+               {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-[#5C4B3A]" />}
+             </button>
+ 
++            {/* Customizer */}
+             <button
+               id="customize-portfolio-btn"
+               onClick={onOpenCustomizer}
+               aria-label="Customize Portfolio"
+-              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-xl text-[#5C4B3A] dark:text-[#E4DBCB] bg-[#EFE6D5] hover:bg-[#E4DBCB]/70 dark:bg-[#4A3C31] dark:hover:bg-[#5C4B3A]/80 border border-[#E4DBCB] dark:border-[#5C4B3A] transition-colors"
+-              title="Customize portfolio content"
++              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-xl text-[#5C4B3A] dark:text-[#E4DBCB] bg-[#EFE6D5]/90 dark:bg-[#3A2F26]/90 hover:bg-[#E4DBCB] dark:hover:bg-[#4A3C31] border border-[#E4DBCB] dark:border-[#4A3C31] transition-colors"
++              title="Customize portfolio content in real-time"
+             >
+-              <Sliders className="w-3.5 h-3.5 text-[#B9861F] dark:text-[#D9A62E]" />
+-              <span>Customize</span>
++              <Sliders className="w-3.5 h-3.5 text-[#CC9A24]" />
++              <span>Edit</span>
+             </button>
+ 
++            {/* Resume Button */}
+             <button
+               id="view-resume-nav-btn"
+               onClick={onOpenResume}
+-              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl text-white bg-[#B9861F] hover:bg-[#A2731A] active:bg-[#8A6015] dark:bg-[#B9861F] dark:hover:bg-[#CC9A24] shadow-xs hover:shadow-sm transition-all"
++              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs sm:text-sm font-semibold rounded-xl text-white bg-[#B9861F] hover:bg-[#A2731A] active:bg-[#8A6015] dark:bg-[#B9861F] dark:hover:bg-[#CC9A24] shadow-2xs transition-all"
+             >
+               <FileText className="w-3.5 h-3.5" />
+-              <span>Resume</span>
++              <span>CV</span>
+             </button>
+           </div>
+ 
+-          {/* Mobile menu button */}
+-          <div className="flex items-center gap-2 sm:hidden">
++          {/* Mobile menu toggle & search */}
++          <div className="flex items-center gap-1.5 sm:hidden">
++            <button
++              id="mobile-cmd-btn"
++              onClick={onOpenCommandPalette}
++              className="p-2 rounded-xl bg-[#EFE6D5] dark:bg-[#4A3C31] text-[#5C4B3A] dark:text-[#D3C6AF]"
++              title="Search"
++            >
++              <Command className="w-4 h-4" />
++            </button>
++
+             <button
+               id="mobile-theme-toggle-btn"
+               onClick={onToggleTheme}
+               aria-label="Toggle theme"
+-              className="p-2 rounded-lg text-[#7A6B58] dark:text-[#D3C6AF] hover:bg-[#EFE6D5] dark:hover:bg-[#4A3C31]"
++              className="p-2 rounded-xl bg-[#EFE6D5] dark:bg-[#4A3C31] text-[#5C4B3A] dark:text-[#D3C6AF]"
+             >
+               {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-[#5C4B3A]" />}
+             </button>
+@@ -164,19 +214,20 @@
+               id="mobile-menu-toggle-btn"
+               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+               aria-label="Open menu"
+-              className="p-2 rounded-lg text-[#5C4B3A] dark:text-[#E4DBCB] hover:bg-[#EFE6D5] dark:hover:bg-[#4A3C31]"
++              className="p-2 rounded-xl bg-[#EFE6D5] dark:bg-[#4A3C31] text-[#5C4B3A] dark:text-[#D3C6AF]"
+             >
+               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+             </button>
+           </div>
++
+         </div>
+       </div>
+ 
+-      {/* Mobile Drawer Menu */}
++      {/* Mobile Dropdown Drawer */}
+       {mobileMenuOpen && (
+         <div
+           id="mobile-dropdown-menu"
+-          className="sm:hidden bg-white/95 dark:bg-[#3A2F26]/95 border-b border-[#E4DBCB] dark:border-[#4A3C31] px-4 pt-2 pb-6 backdrop-blur-md shadow-lg"
++          className="sm:hidden bg-white/95 dark:bg-[#2A211C]/95 border-b border-[#E4DBCB] dark:border-[#4A3C31] px-4 pt-3 pb-6 backdrop-blur-xl shadow-xl mt-2"
+         >
+           <div className="flex flex-col gap-1.5 mb-4">
+             {navLinks.map((link) => (
+@@ -184,10 +235,10 @@
+                 key={link.id}
+                 id={`mobile-nav-${link.id}`}
+                 onClick={() => handleNavClick(link.href)}
+-                className={`text-left px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors ${
++                className={`text-left px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                   activeSection === link.id
+                     ? 'bg-[#F6E9C4] dark:bg-[#3D2F12]/50 text-[#B9861F] dark:text-[#D9A62E] font-semibold'
+-                    : 'text-[#5C4B3A] dark:text-[#E4DBCB] hover:bg-[#EFE6D5] dark:hover:bg-[#4A3C31]'
++                    : 'text-[#5C4B3A] dark:text-[#E4DBCB] hover:bg-[#EFE6D5] dark:hover:bg-[#3A2F26]'
+                 }`}
+               >
+                 {link.name}
+@@ -197,6 +248,18 @@
+ 
+           <div className="pt-3 border-t border-[#E4DBCB] dark:border-[#4A3C31] flex flex-col gap-2">
+             <button
++              id="mobile-terminal-btn"
++              onClick={() => {
++                setMobileMenuOpen(false);
++                onOpenTerminal();
++              }}
++              className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-mono font-semibold rounded-xl text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800"
++            >
++              <Terminal className="w-4 h-4" />
++              <span>Launch Interactive CLI</span>
++            </button>
++
++            <button
+               id="mobile-resume-btn"
+               onClick={() => {
+                 setMobileMenuOpen(false);
+@@ -205,7 +268,7 @@
+               className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-xl text-white bg-[#B9861F] hover:bg-[#A2731A] transition-colors"
+             >
+               <FileText className="w-4 h-4" />
+-              <span>View & Download Resume</span>
++              <span>View & Download Resume PDF</span>
+             </button>
+ 
+             <button
+@@ -214,10 +277,10 @@
+                 setMobileMenuOpen(false);
+                 onOpenCustomizer();
+               }}
+-              className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-xl text-[#5C4B3A] dark:text-[#E4DBCB] bg-[#EFE6D5] dark:bg-[#4A3C31] hover:bg-[#E4DBCB] dark:hover:bg-[#5C4B3A] transition-colors"
++              className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-xl text-[#5C4B3A] dark:text-[#E4DBCB] bg-[#EFE6D5] dark:bg-[#3A2F26] hover:bg-[#E4DBCB] dark:hover:bg-[#4A3C31] transition-colors"
+             >
+               <Sliders className="w-4 h-4 text-[#CC9A24]" />
+-              <span>Customize Profile Content</span>
++              <span>Customize Profile Data</span>
+             </button>
+           </div>
+         </div>
+diff -ruN a2/src/components/PortfolioCustomizer.tsx b2/src/components/PortfolioCustomizer.tsx
+--- a2/src/components/PortfolioCustomizer.tsx	2026-08-29 14:40:37.950019750 +0000
++++ b2/src/components/PortfolioCustomizer.tsx	2026-08-29 14:40:37.953975004 +0000
+@@ -14,8 +14,9 @@
+   Cpu,
+   Layers
+ } from 'lucide-react';
+-import { ProfileData, Project } from '../types';
++import { ProfileData, Project, SkillCategory } from '../types';
+ import { defaultPortfolioData } from '../data/initialPortfolio';
++import { TechLogo } from './TechLogo';
+ 
+ interface PortfolioCustomizerProps {
+   isOpen: boolean;
+@@ -34,7 +35,7 @@
+ }) => {
+   const [formData, setFormData] = useState<ProfileData>(profile);
+   const [savedToast, setSavedToast] = useState(false);
+-  const [activeTab, setActiveTab] = useState<'profile' | 'projects'>('profile');
++  const [activeTab, setActiveTab] = useState<'profile' | 'projects' | 'skills'>('profile');
+ 
+   if (!isOpen) return null;
+ 
+@@ -147,13 +148,23 @@
+                 : 'border-transparent text-[#9C8A6E] hover:text-[#3A2F26] dark:hover:text-white'
+             }`}
+           >
+-            Projects List ({formData.projects.length})
++            Projects ({formData.projects.length})
++          </button>
++          <button
++            onClick={() => setActiveTab('skills')}
++            className={`pb-2.5 px-3 text-xs font-bold border-b-2 transition-colors ${
++              activeTab === 'skills'
++                ? 'border-[#B9861F] text-[#B9861F] dark:text-[#D9A62E]'
++                : 'border-transparent text-[#9C8A6E] hover:text-[#3A2F26] dark:hover:text-white'
++            }`}
++          >
++            Skills & Percentages
+           </button>
+         </div>
+ 
+         {/* Form Body */}
+         <div className="flex-1 p-6 overflow-y-auto space-y-5">
+-          {activeTab === 'profile' ? (
++          {activeTab === 'profile' && (
+             <>
+               {/* Full Name */}
+               <div>
+@@ -277,7 +288,9 @@
+                 </div>
+               </div>
+             </>
+-          ) : (
++          )}
++
++          {activeTab === 'projects' && (
+             <div className="space-y-4">
+               <p className="text-xs text-[#9C8A6E]">
+                 You can inspect or quick-edit project titles and categories:
+@@ -315,6 +328,68 @@
+                 </div>
+               ))}
+             </div>
++          )}
++
++          {activeTab === 'skills' && (
++            <div className="space-y-6">
++              <p className="text-xs text-[#9C8A6E]">
++                Adjust proficiency percentage and experience for any technology:
++              </p>
++              {formData.skillCategories.map((cat, catIdx) => (
++                <div key={catIdx} className="space-y-3">
++                  <div className="text-xs font-bold text-[#4A3C31] dark:text-[#E4DBCB] uppercase tracking-wider border-b border-[#E4DBCB] dark:border-[#4A3C31] pb-1">
++                    {cat.title}
++                  </div>
++                  <div className="space-y-3">
++                    {cat.skills.map((skill, skillIdx) => (
++                      <div
++                        key={skillIdx}
++                        className="p-3 rounded-xl bg-[#F7F2E9] dark:bg-[#4A3C31]/60 border border-[#E4DBCB] dark:border-[#5C4B3A]/80 space-y-2"
++                      >
++                        <div className="flex items-center justify-between gap-2">
++                          <div className="flex items-center gap-2">
++                            <TechLogo name={skill.name} size={20} />
++                            <span className="font-semibold text-xs text-[#3A2F26] dark:text-white">
++                              {skill.name}
++                            </span>
++                          </div>
++                          <span className="text-xs font-mono font-bold text-[#B9861F] dark:text-[#D9A62E]">
++                            {skill.level}%
++                          </span>
++                        </div>
++
++                        {/* Interactive Slider */}
++                        <div className="flex items-center gap-3">
++                          <input
++                            type="range"
++                            min={50}
++                            max={100}
++                            value={skill.level}
++                            onChange={(e) => {
++                              const newCategories = [...formData.skillCategories];
++                              newCategories[catIdx].skills[skillIdx].level = parseInt(e.target.value, 10);
++                              setFormData({ ...formData, skillCategories: newCategories });
++                            }}
++                            className="flex-1 accent-indigo-600 h-1.5 bg-[#E4DBCB] dark:bg-[#5C4B3A] rounded-lg cursor-pointer"
++                          />
++                          <input
++                            type="text"
++                            value={skill.experience}
++                            onChange={(e) => {
++                              const newCategories = [...formData.skillCategories];
++                              newCategories[catIdx].skills[skillIdx].experience = e.target.value;
++                              setFormData({ ...formData, skillCategories: newCategories });
++                            }}
++                            className="w-16 px-1.5 py-0.5 text-[11px] font-mono text-center rounded bg-white dark:bg-[#3A2F26] border border-[#E4DBCB] dark:border-[#5C4B3A]"
++                            title="Years of experience"
++                          />
++                        </div>
++                      </div>
++                    ))}
++                  </div>
++                </div>
++              ))}
++            </div>
+           )}
+         </div>
+ 
+diff -ruN a2/src/components/Skills.tsx b2/src/components/Skills.tsx
+--- a2/src/components/Skills.tsx	2026-08-29 14:40:37.950457108 +0000
++++ b2/src/components/Skills.tsx	2026-08-29 14:40:37.954271693 +0000
+@@ -5,172 +5,511 @@
+   Server, 
+   Cloud, 
+   Cpu, 
+-  CheckCircle, 
+   Search, 
+   Sparkles,
+   Zap,
+-  Terminal
++  Terminal,
++  Layers,
++  CheckCircle2,
++  SlidersHorizontal,
++  ExternalLink,
++  ChevronRight,
++  BarChart3,
++  Award,
++  ArrowUpRight,
++  Info
+ } from 'lucide-react';
+-import { SkillCategory } from '../types';
++import { SkillCategory, SkillItem, Project } from '../types';
++import { TechLogo } from './TechLogo';
+ 
+ interface SkillsProps {
+   categories: SkillCategory[];
++  projects?: Project[];
++  onSelectProject?: (project: Project) => void;
+ }
+ 
+-export const Skills: React.FC<SkillsProps> = ({ categories }) => {
+-  const [skillSearch, setSkillSearch] = useState('');
+-
+-  const getCategoryIcon = (iconName: string) => {
+-    switch (iconName) {
+-      case 'Layout':
+-        return <Layout className="w-5 h-5 text-[#CC9A24]" />;
+-      case 'Server':
+-        return <Server className="w-5 h-5 text-emerald-500" />;
+-      case 'Cloud':
+-        return <Cloud className="w-5 h-5 text-sky-500" />;
+-      case 'Cpu':
+-        return <Cpu className="w-5 h-5 text-purple-500" />;
+-      default:
+-        return <Code2 className="w-5 h-5 text-[#CC9A24]" />;
+-    }
+-  };
+-
+-  const filteredCategories = categories.map((cat) => {
++export const Skills: React.FC<SkillsProps> = ({ categories, projects = [], onSelectProject }) => {
++  const [activeCategory, setActiveCategory] = useState<string>('all');
++  const [skillSearch, setSkillSearch] = useState<string>('');
++  const [selectedSkill, setSelectedSkill] = useState<SkillItem | null>(null);
++  const [minProficiency, setMinProficiency] = useState<number>(0);
++  const [viewMode, setViewMode] = useState<'cards' | 'bento'>('cards');
++
++  // Flatten all skills for quick global access
++  const allSkillsWithCat = categories.flatMap((cat) =>
++    cat.skills.map((skill) => ({
++      ...skill,
++      categoryTitle: cat.title,
++      iconName: cat.iconName,
++    }))
++  );
++
++  // Default selected skill on first render
++  const currentSkill = selectedSkill || allSkillsWithCat[0] || null;
++
++  // Filter skills based on category, search, and proficiency
++  const filteredSkills = allSkillsWithCat.filter((skill) => {
++    const matchesCategory = activeCategory === 'all' || skill.categoryTitle.toLowerCase().includes(activeCategory.toLowerCase());
+     const q = skillSearch.toLowerCase().trim();
+-    if (!q) return cat;
++    const matchesSearch = !q || skill.name.toLowerCase().includes(q) || skill.categoryTitle.toLowerCase().includes(q) || skill.experience.toLowerCase().includes(q);
++    const matchesProficiency = skill.level >= minProficiency;
++    return matchesCategory && matchesSearch && matchesProficiency;
++  });
++
++  // Calculate proficiency tier
++  const getProficiencyTier = (level: number) => {
++    if (level >= 92) return { label: 'Mastery', color: 'emerald', text: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-950/50', border: 'border-emerald-200 dark:border-emerald-800' };
++    if (level >= 85) return { label: 'Advanced', color: 'indigo', text: 'text-[#B9861F] dark:text-[#D9A62E]', bg: 'bg-[#F6E9C4] dark:bg-[#3D2F12]/50', border: 'border-[#E8C765] dark:border-[#8A6015]' };
++    if (level >= 75) return { label: 'Proficient', color: 'sky', text: 'text-sky-600 dark:text-sky-400', bg: 'bg-sky-50 dark:bg-sky-950/50', border: 'border-sky-200 dark:border-sky-800' };
++    return { label: 'Working', color: 'amber', text: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-950/50', border: 'border-amber-200 dark:border-amber-800' };
++  };
+ 
+-    const filteredSkills = cat.skills.filter(
+-      (s) =>
+-        s.name.toLowerCase().includes(q) ||
+-        cat.title.toLowerCase().includes(q) ||
+-        s.experience.toLowerCase().includes(q)
+-    );
+-
+-    return {
+-      ...cat,
+-      skills: filteredSkills,
+-    };
+-  }).filter((cat) => cat.skills.length > 0);
++  // Find projects matching current selected skill
++  const relatedProjects = currentSkill
++    ? projects.filter((p) =>
++        p.tags.some(
++          (t) =>
++            t.toLowerCase().includes(currentSkill.name.toLowerCase()) ||
++            currentSkill.name.toLowerCase().includes(t.toLowerCase())
++        )
++      )
++    : [];
++
++  // Helper for Circular SVG progress calculation
++  const radius = 22;
++  const circumference = 2 * Math.PI * radius;
+ 
+   return (
+-    <section id="skills" className="py-20 sm:py-28 bg-[#EFE6D5]/60 dark:bg-[#3A2F26]/40 border-y border-[#E4DBCB]/60 dark:border-[#4A3C31]/60">
++    <section id="skills" className="py-20 sm:py-28 bg-[#EFE6D5]/60 dark:bg-[#3A2F26]/40 border-y border-[#E4DBCB]/60 dark:border-[#4A3C31]/60 relative overflow-hidden">
++      {/* Background visual accents */}
++      <div className="absolute top-10 left-1/3 w-96 h-96 bg-[#CC9A24]/5 dark:bg-[#CC9A24]/10 blur-[100px] rounded-full pointer-events-none -z-10" />
++      <div className="absolute bottom-10 right-10 w-80 h-80 bg-sky-500/5 dark:bg-sky-500/10 blur-[80px] rounded-full pointer-events-none -z-10" />
++
+       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+         
+-        {/* Section Header */}
+-        <div className="max-w-3xl mx-auto text-center mb-12 sm:mb-16">
+-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-[#F6E9C4] dark:bg-[#3D2F12]/50 border border-[#E8C765] dark:border-[#8A6015]/50 text-[#B9861F] dark:text-[#D9A62E] text-xs font-semibold uppercase tracking-wider mb-3">
++        {/* Header */}
++        <div className="max-w-3xl mx-auto text-center mb-10 sm:mb-14">
++          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#F6E9C4] dark:bg-[#3D2F12]/50 border border-[#E8C765] dark:border-[#8A6015]/50 text-[#B9861F] dark:text-[#D9A62E] text-xs font-semibold uppercase tracking-wider mb-3 shadow-2xs">
+             <Zap className="w-3.5 h-3.5" />
+-            <span>Technical Capabilities</span>
++            <span>Interactive Tech Stack</span>
+           </div>
+-          <h2 className="text-3xl sm:text-4xl font-extrabold text-[#3A2F26] dark:text-white tracking-tight">
+-            Skills & Core Competencies
++          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#3A2F26] dark:text-white tracking-tight">
++            Skills & Technical Mastery
+           </h2>
+-          <p className="mt-3 text-base text-[#7A6B58] dark:text-[#B9A98C] leading-relaxed">
+-            A comprehensive inventory of frameworks, cloud technologies, database systems, and methodologies I work with daily.
++          <p className="mt-3.5 text-base sm:text-lg text-[#7A6B58] dark:text-[#D3C6AF] leading-relaxed">
++            Click on any technology to inspect verified proficiency percentages, production benchmarks, and shipped project architectures.
+           </p>
++        </div>
++
++        {/* Interactive Control Filter Bar */}
++        <div className="mb-8 flex flex-col md:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-white dark:bg-[#3A2F26] border border-[#E4DBCB] dark:border-[#4A3C31] shadow-xs">
++          
++          {/* Category Tabs */}
++          <div className="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto pb-1 md:pb-0 scrollbar-none">
++            <button
++              onClick={() => setActiveCategory('all')}
++              className={`px-3.5 py-1.5 text-xs font-semibold rounded-xl whitespace-nowrap transition-all ${
++                activeCategory === 'all'
++                  ? 'bg-[#B9861F] text-white shadow-xs'
++                  : 'text-[#7A6B58] dark:text-[#D3C6AF] hover:bg-[#EFE6D5] dark:hover:bg-[#4A3C31]'
++              }`}
++            >
++              All Tech ({allSkillsWithCat.length})
++            </button>
++            {categories.map((cat, idx) => {
++              const isActive = activeCategory.toLowerCase() === cat.title.toLowerCase();
++              return (
++                <button
++                  key={idx}
++                  onClick={() => setActiveCategory(cat.title)}
++                  className={`px-3.5 py-1.5 text-xs font-semibold rounded-xl whitespace-nowrap transition-all ${
++                    isActive
++                      ? 'bg-[#B9861F] text-white shadow-xs'
++                      : 'text-[#7A6B58] dark:text-[#D3C6AF] hover:bg-[#EFE6D5] dark:hover:bg-[#4A3C31]'
++                  }`}
++                >
++                  {cat.title.split('&')[0].trim()}
++                </button>
++              );
++            })}
++          </div>
+ 
+-          {/* Quick Skill Search */}
+-          <div className="mt-8 max-w-sm mx-auto relative">
+-            <Search className="w-4 h-4 text-[#B9A98C] absolute left-3.5 top-1/2 -translate-y-1/2" />
+-            <input
+-              id="skills-search-input"
+-              type="text"
+-              placeholder="Search skill (e.g. React, Docker, Go)..."
+-              value={skillSearch}
+-              onChange={(e) => setSkillSearch(e.target.value)}
+-              className="w-full pl-9 pr-4 py-2 text-xs sm:text-sm rounded-xl bg-white dark:bg-[#4A3C31] border border-[#E4DBCB] dark:border-[#5C4B3A] text-[#3A2F26] dark:text-white placeholder:text-[#B9A98C] focus:outline-none focus:ring-2 focus:ring-[#CC9A24] shadow-2xs"
+-            />
++          {/* Search & Minimum Proficiency Filter */}
++          <div className="flex items-center gap-3 w-full md:w-auto">
++            {/* Search Input */}
++            <div className="relative flex-1 sm:w-56">
++              <Search className="w-4 h-4 text-[#B9A98C] absolute left-3 top-1/2 -translate-y-1/2" />
++              <input
++                id="skill-filter-search"
++                type="text"
++                placeholder="Search skill (e.g. React, Go, Docker)..."
++                value={skillSearch}
++                onChange={(e) => setSkillSearch(e.target.value)}
++                className="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl bg-[#F7F2E9] dark:bg-[#4A3C31] border border-[#E4DBCB] dark:border-[#5C4B3A] text-[#3A2F26] dark:text-white placeholder:text-[#B9A98C] focus:outline-none focus:ring-2 focus:ring-[#CC9A24]"
++              />
++            </div>
++
++            {/* Proficiency Tier Pills */}
++            <div className="hidden sm:flex items-center gap-1 shrink-0">
++              <button
++                onClick={() => setMinProficiency(0)}
++                className={`px-2.5 py-1 text-[11px] font-mono rounded-lg border transition-colors ${
++                  minProficiency === 0
++                    ? 'bg-[#E4DBCB] dark:bg-[#5C4B3A] border-[#D3C6AF] dark:border-[#7A6B58] font-bold text-[#3A2F26] dark:text-white'
++                    : 'border-[#E4DBCB] dark:border-[#4A3C31] text-[#9C8A6E]'
++                }`}
++                title="Show all skills"
++              >
++                All
++              </button>
++              <button
++                onClick={() => setMinProficiency(85)}
++                className={`px-2.5 py-1 text-[11px] font-mono rounded-lg border transition-colors ${
++                  minProficiency === 85
++                    ? 'bg-[#F6E9C4] dark:bg-[#3D2F12]/60 border-[#DFB94A] dark:border-[#A2731A] text-[#B9861F] dark:text-[#D9A62E] font-bold'
++                    : 'border-[#E4DBCB] dark:border-[#4A3C31] text-[#9C8A6E]'
++                }`}
++                title="Filter 85%+ Proficiency"
++              >
++                85%+
++              </button>
++              <button
++                onClick={() => setMinProficiency(90)}
++                className={`px-2.5 py-1 text-[11px] font-mono rounded-lg border transition-colors ${
++                  minProficiency === 90
++                    ? 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-300 dark:border-emerald-700 text-emerald-600 dark:text-emerald-400 font-bold'
++                    : 'border-[#E4DBCB] dark:border-[#4A3C31] text-[#9C8A6E]'
++                }`}
++                title="Filter 90%+ Mastery"
++              >
++                90%+ Mastery
++              </button>
++            </div>
+           </div>
++
+         </div>
+ 
+-        {/* Categories Grid */}
+-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+-          {filteredCategories.map((category, catIdx) => (
+-            <div
+-              key={catIdx}
+-              id={`skill-category-${category.title.toLowerCase().replace(/[^a-z0-9]/g, '-')}`}
+-              className="rounded-2xl bg-white dark:bg-[#3A2F26] p-6 sm:p-7 border border-[#E4DBCB] dark:border-[#4A3C31] shadow-xs hover:border-[#D3C6AF] dark:hover:border-[#5C4B3A] transition-colors flex flex-col justify-between"
+-            >
+-              <div>
+-                {/* Category Header */}
+-                <div className="flex items-start gap-3.5 pb-5 border-b border-[#EFE6D5] dark:border-[#4A3C31]">
+-                  <div className="p-2.5 rounded-xl bg-[#F7F2E9] dark:bg-[#4A3C31]/80 border border-[#EFE6D5] dark:border-[#5C4B3A] shrink-0">
+-                    {getCategoryIcon(category.iconName)}
++        {/* Main Grid: Skills Matrix + Live Inspector Spotlight */}
++        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
++          
++          {/* Left / Center Grid: Interactive Skill Cards */}
++          <div className="lg:col-span-8">
++            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
++              {filteredSkills.map((skill, index) => {
++                const tier = getProficiencyTier(skill.level);
++                const isSelected = currentSkill?.name === skill.name;
++                const strokeOffset = circumference - (skill.level / 100) * circumference;
++
++                return (
++                  <div
++                    key={index}
++                    id={`skill-card-${skill.name.toLowerCase().replace(/[^a-z0-9]/g, '-')}`}
++                    onClick={() => setSelectedSkill(skill)}
++                    className={`group relative p-4 rounded-2xl border transition-all duration-200 cursor-pointer flex flex-col justify-between ${
++                      isSelected
++                        ? 'bg-white dark:bg-[#3A2F26] border-[#CC9A24] dark:border-[#D9A62E] shadow-md ring-2 ring-[#CC9A24]/20'
++                        : 'bg-white dark:bg-[#3A2F26] border-[#E4DBCB]/90 dark:border-[#4A3C31] hover:border-[#D3C6AF] dark:hover:border-[#5C4B3A] hover:shadow-sm'
++                    }`}
++                  >
++                    {/* Top Row: Tech Logo + Title + Circular Percentage Radial Meter */}
++                    <div className="flex items-start justify-between gap-3">
++                      
++                      {/* Logo and Name */}
++                      <div className="flex items-center gap-3 min-w-0">
++                        <div className="p-2.5 rounded-xl bg-[#F7F2E9] dark:bg-[#4A3C31]/90 border border-[#EFE6D5] dark:border-[#5C4B3A]/80 shadow-2xs group-hover:scale-105 transition-transform shrink-0 flex items-center justify-center">
++                          <TechLogo name={skill.name} size={28} />
++                        </div>
++                        <div className="min-w-0">
++                          <div className="flex items-center gap-1.5">
++                            <span className="font-bold text-sm sm:text-base text-[#3A2F26] dark:text-white truncate group-hover:text-[#B9861F] dark:group-hover:text-[#D9A62E] transition-colors">
++                              {skill.name}
++                            </span>
++                            {skill.highlighted && (
++                              <span className="w-1.5 h-1.5 rounded-full bg-[#CC9A24] shrink-0" title="Core Skill" />
++                            )}
++                          </div>
++                          <span className="text-[11px] font-mono text-[#B9A98C] dark:text-[#9C8A6E] block truncate">
++                            {skill.experience} production
++                          </span>
++                        </div>
++                      </div>
++
++                      {/* Interactive Circular Radial Percentage Gauge */}
++                      <div className="relative flex items-center justify-center shrink-0 w-12 h-12">
++                        <svg className="w-12 h-12 -rotate-90 transform" viewBox="0 0 52 52">
++                          {/* Background ring */}
++                          <circle
++                            cx="26"
++                            cy="26"
++                            r={radius}
++                            className="stroke-[#EFE6D5] dark:stroke-[#4A3C31]"
++                            strokeWidth="4"
++                            fill="transparent"
++                          />
++                          {/* Animated Progress ring */}
++                          <circle
++                            cx="26"
++                            cy="26"
++                            r={radius}
++                            className={`transition-all duration-700 ${
++                              skill.level >= 90
++                                ? 'stroke-[#B9861F] dark:stroke-[#D9A62E]'
++                                : skill.level >= 80
++                                ? 'stroke-sky-500 dark:stroke-sky-400'
++                                : 'stroke-emerald-500 dark:stroke-emerald-400'
++                            }`}
++                            strokeWidth="4"
++                            strokeDasharray={circumference}
++                            strokeDashoffset={strokeOffset}
++                            strokeLinecap="round"
++                            fill="transparent"
++                          />
++                        </svg>
++                        <span className="absolute text-[11px] font-extrabold font-mono text-[#4A3C31] dark:text-[#E4DBCB]">
++                          {skill.level}%
++                        </span>
++                      </div>
++                    </div>
++
++                    {/* Bottom Row: Linear Progress Bar & Tier Badge */}
++                    <div className="mt-4 pt-3 border-t border-[#EFE6D5] dark:border-[#4A3C31]/80 flex items-center justify-between gap-3">
++                      {/* Interactive Progress Meter */}
++                      <div className="flex-1 space-y-1">
++                        <div className="w-full h-1.5 rounded-full bg-[#EFE6D5] dark:bg-[#4A3C31] overflow-hidden">
++                          <div
++                            className={`h-full rounded-full transition-all duration-500 ${
++                              skill.level >= 90
++                                ? 'bg-gradient-to-r from-[#CC9A24] to-[#B9861F]'
++                                : skill.level >= 80
++                                ? 'bg-gradient-to-r from-sky-500 to-[#CC9A24]'
++                                : 'bg-gradient-to-r from-emerald-500 to-sky-500'
++                            }`}
++                            style={{ width: `${skill.level}%` }}
++                          />
++                        </div>
++                      </div>
++
++                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-mono font-semibold ${tier.bg} ${tier.text} ${tier.border} border`}>
++                        {tier.label}
++                      </span>
++                    </div>
++
++                  </div>
++                );
++              })}
++            </div>
++
++            {filteredSkills.length === 0 && (
++              <div className="p-12 text-center rounded-2xl bg-white dark:bg-[#3A2F26] border border-[#E4DBCB] dark:border-[#4A3C31]">
++                <Search className="w-8 h-8 mx-auto mb-2 text-[#B9A98C] opacity-60" />
++                <p className="text-sm font-semibold text-[#5C4B3A] dark:text-[#D3C6AF]">No skills match your current filter</p>
++                <button
++                  onClick={() => {
++                    setSkillSearch('');
++                    setMinProficiency(0);
++                    setActiveCategory('all');
++                  }}
++                  className="mt-3 px-3 py-1.5 text-xs rounded-lg bg-[#B9861F] text-white font-medium hover:bg-[#A2731A] transition-colors"
++                >
++                  Reset Filters
++                </button>
++              </div>
++            )}
++          </div>
++
++          {/* Right Column: Live Interactive Skill Inspector Spotlight */}
++          {currentSkill && (
++            <div className="lg:col-span-4 sticky top-24">
++              <div className="rounded-3xl bg-white dark:bg-[#3A2F26] p-6 sm:p-7 border border-[#E4DBCB] dark:border-[#4A3C31] shadow-xl space-y-6">
++                
++                {/* Inspector Header */}
++                <div className="flex items-center justify-between pb-5 border-b border-[#EFE6D5] dark:border-[#4A3C31]">
++                  <div className="flex items-center gap-2 text-xs font-bold text-[#B9861F] dark:text-[#D9A62E] uppercase tracking-wider font-mono">
++                    <BarChart3 className="w-4 h-4" />
++                    <span>Skill Telemetry</span>
++                  </div>
++                  <span className="text-[11px] font-mono text-[#B9A98C]">
++                    Live Gauge
++                  </span>
++                </div>
++
++                {/* Main Skill Focus Hero */}
++                <div className="flex items-center gap-4">
++                  <div className="p-3.5 rounded-2xl bg-[#F7F2E9] dark:bg-[#4A3C31] border border-[#EFE6D5] dark:border-[#5C4B3A] shadow-sm shrink-0">
++                    <TechLogo name={currentSkill.name} size={40} />
+                   </div>
+                   <div>
+-                    <h3 className="text-base sm:text-lg font-bold text-[#3A2F26] dark:text-white">
+-                      {category.title}
++                    <h3 className="text-xl font-extrabold text-[#3A2F26] dark:text-white leading-tight">
++                      {currentSkill.name}
+                     </h3>
+-                    <p className="text-xs sm:text-sm text-[#9C8A6E] dark:text-[#B9A98C] mt-0.5">
+-                      {category.description}
+-                    </p>
++                    <div className="flex items-center gap-2 mt-1">
++                      <span className="text-xs text-[#9C8A6E] dark:text-[#B9A98C] font-mono">
++                        {currentSkill.experience} in production
++                      </span>
++                    </div>
+                   </div>
+                 </div>
+ 
+-                {/* Skill Items List */}
+-                <div className="mt-5 space-y-4">
+-                  {category.skills.map((skill, sIdx) => (
+-                    <div key={sIdx} className="space-y-1.5">
+-                      <div className="flex items-center justify-between text-xs sm:text-sm">
+-                        <div className="flex items-center gap-2">
+-                          <span className="font-semibold text-[#4A3C31] dark:text-[#E4DBCB]">
+-                            {skill.name}
+-                          </span>
+-                          {skill.highlighted && (
+-                            <span className="px-1.5 py-0.2 rounded text-[10px] font-mono font-medium bg-[#F6E9C4] text-[#A2731A] dark:bg-[#3D2F12]/60 dark:text-[#DFB94A] border border-[#E8C765] dark:border-[#8A6015]">
+-                              Core
+-                            </span>
+-                          )}
+-                        </div>
+-                        <div className="flex items-center gap-2 text-xs font-mono text-[#9C8A6E] dark:text-[#B9A98C]">
+-                          <span>{skill.experience}</span>
+-                          <span className="font-semibold text-[#5C4B3A] dark:text-[#D3C6AF]">{skill.level}%</span>
+-                        </div>
++                {/* Big Interactive Radial Gauge Spotlight */}
++                <div className="p-5 rounded-2xl bg-[#F7F2E9] dark:bg-[#4A3C31]/50 border border-[#EFE6D5] dark:border-[#4A3C31] flex items-center justify-between gap-4">
++                  <div>
++                    <span className="text-[11px] font-semibold text-[#B9A98C] uppercase tracking-wider block">
++                      Proficiency Level
++                    </span>
++                    <div className="text-3xl font-black text-[#3A2F26] dark:text-white tracking-tight mt-0.5">
++                      {currentSkill.level}%
++                    </div>
++                    <div className="mt-1.5">
++                      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-mono font-bold ${getProficiencyTier(currentSkill.level).bg} ${getProficiencyTier(currentSkill.level).text}`}>
++                        <Sparkles className="w-3 h-3" />
++                        {getProficiencyTier(currentSkill.level).label} Tier
++                      </span>
++                    </div>
++                  </div>
++
++                  {/* Circular Dial */}
++                  <div className="relative w-20 h-20 flex items-center justify-center shrink-0">
++                    <svg className="w-20 h-20 -rotate-90 transform" viewBox="0 0 60 60">
++                      <circle
++                        cx="30"
++                        cy="30"
++                        r="25"
++                        className="stroke-[#E4DBCB] dark:stroke-[#5C4B3A]"
++                        strokeWidth="5"
++                        fill="transparent"
++                      />
++                      <circle
++                        cx="30"
++                        cy="30"
++                        r="25"
++                        className="stroke-[#B9861F] dark:stroke-[#D9A62E] transition-all duration-700"
++                        strokeWidth="5"
++                        strokeDasharray={2 * Math.PI * 25}
++                        strokeDashoffset={2 * Math.PI * 25 - (currentSkill.level / 100) * 2 * Math.PI * 25}
++                        strokeLinecap="round"
++                        fill="transparent"
++                      />
++                    </svg>
++                    <div className="absolute text-center">
++                      <span className="text-xs font-extrabold font-mono text-[#3A2F26] dark:text-white">
++                        {currentSkill.level}%
++                      </span>
++                    </div>
++                  </div>
++                </div>
++
++                {/* Sub-competencies breakdown */}
++                <div className="space-y-3">
++                  <div className="text-xs font-bold text-[#3A2F26] dark:text-white uppercase tracking-wider">
++                    Competency Breakdown
++                  </div>
++
++                  <div className="space-y-2 text-xs font-mono">
++                    <div>
++                      <div className="flex justify-between text-[#7A6B58] dark:text-[#D3C6AF] mb-1">
++                        <span>Production Architecture</span>
++                        <span className="font-bold text-[#B9861F] dark:text-[#D9A62E]">{Math.min(100, currentSkill.level + 2)}%</span>
++                      </div>
++                      <div className="h-1.5 rounded-full bg-[#EFE6D5] dark:bg-[#4A3C31] overflow-hidden">
++                        <div className="h-full bg-[#CC9A24] rounded-full" style={{ width: `${Math.min(100, currentSkill.level + 2)}%` }} />
+                       </div>
++                    </div>
+ 
+-                      {/* Level Progress Bar */}
+-                      <div className="w-full h-2 rounded-full bg-[#EFE6D5] dark:bg-[#4A3C31] overflow-hidden">
+-                        <div
+-                          className="h-full rounded-full bg-[#B9861F] dark:bg-[#CC9A24] transition-all duration-500"
+-                          style={{ width: `${skill.level}%` }}
+-                        />
++                    <div>
++                      <div className="flex justify-between text-[#7A6B58] dark:text-[#D3C6AF] mb-1">
++                        <span>Performance & Optimization</span>
++                        <span className="font-bold text-sky-600 dark:text-sky-400">{currentSkill.level}%</span>
++                      </div>
++                      <div className="h-1.5 rounded-full bg-[#EFE6D5] dark:bg-[#4A3C31] overflow-hidden">
++                        <div className="h-full bg-sky-500 rounded-full" style={{ width: `${currentSkill.level}%` }} />
+                       </div>
+                     </div>
+-                  ))}
++
++                    <div>
++                      <div className="flex justify-between text-[#7A6B58] dark:text-[#D3C6AF] mb-1">
++                        <span>API & Ecosystem Integration</span>
++                        <span className="font-bold text-emerald-600 dark:text-emerald-400">{Math.max(70, currentSkill.level - 4)}%</span>
++                      </div>
++                      <div className="h-1.5 rounded-full bg-[#EFE6D5] dark:bg-[#4A3C31] overflow-hidden">
++                        <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${Math.max(70, currentSkill.level - 4)}%` }} />
++                      </div>
++                    </div>
++                  </div>
++                </div>
++
++                {/* Connected Portfolio Projects Built With This Skill */}
++                <div className="pt-2 border-t border-[#EFE6D5] dark:border-[#4A3C31]">
++                  <div className="flex items-center justify-between mb-2.5">
++                    <span className="text-xs font-bold text-[#3A2F26] dark:text-white uppercase tracking-wider">
++                      Shipped Projects ({relatedProjects.length})
++                    </span>
++                    <a
++                      href="#projects"
++                      className="text-[11px] text-[#B9861F] dark:text-[#D9A62E] font-semibold hover:underline inline-flex items-center gap-0.5"
++                    >
++                      <span>All</span>
++                      <ArrowUpRight className="w-3 h-3" />
++                    </a>
++                  </div>
++
++                  {relatedProjects.length > 0 ? (
++                    <div className="space-y-2">
++                      {relatedProjects.slice(0, 2).map((proj) => (
++                        <div
++                          key={proj.id}
++                          onClick={() => {
++                            if (onSelectProject) {
++                              onSelectProject(proj);
++                            } else {
++                              document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' });
++                            }
++                          }}
++                          className="p-2.5 rounded-xl bg-[#F7F2E9] dark:bg-[#4A3C31]/60 border border-[#EFE6D5] dark:border-[#4A3C31] hover:border-[#D9A62E] cursor-pointer transition-colors"
++                        >
++                          <div className="flex items-center justify-between text-xs font-bold text-[#3A2F26] dark:text-white">
++                            <span className="truncate hover:text-[#CC9A24]">{proj.title}</span>
++                            <span className="text-[10px] font-mono text-[#B9A98C] shrink-0">{proj.category}</span>
++                          </div>
++                          <p className="text-[11px] text-[#9C8A6E] dark:text-[#B9A98C] line-clamp-1 mt-0.5">
++                            {proj.subtitle}
++                          </p>
++                        </div>
++                      ))}
++                    </div>
++                  ) : (
++                    <div className="p-3 rounded-xl bg-[#F7F2E9] dark:bg-[#4A3C31]/40 text-[11px] text-[#9C8A6E] dark:text-[#B9A98C] flex items-center gap-2 font-mono">
++                      <Info className="w-4 h-4 text-[#B9A98C] shrink-0" />
++                      <span>Utilized across internal tooling, CI pipelines, and microservices.</span>
++                    </div>
++                  )}
+                 </div>
+-              </div>
+ 
+-              {/* Bottom Quick Chips for Category */}
+-              <div className="mt-6 pt-4 border-t border-[#EFE6D5] dark:border-[#4A3C31] flex items-center gap-1.5 text-xs text-[#9C8A6E] dark:text-[#B9A98C]">
+-                <Terminal className="w-3.5 h-3.5 text-[#B9A98C]" />
+-                <span className="font-mono text-[11px]">
+-                  {category.skills.length} verified proficiencies
+-                </span>
+               </div>
+             </div>
+-          ))}
++          )}
++
+         </div>
+ 
+         {/* Bottom Banner on Craft & Standards */}
+         <div className="mt-12 p-6 rounded-2xl bg-white dark:bg-[#3A2F26] border border-[#E4DBCB] dark:border-[#4A3C31] shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
+-          <div className="flex items-center gap-3 text-center sm:text-left">
++          <div className="flex items-center gap-3.5 text-center sm:text-left">
+             <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 shrink-0">
+-              <CheckCircle className="w-5 h-5" />
++              <CheckCircle2 className="w-5 h-5" />
+             </div>
+             <div>
+               <h4 className="text-sm font-bold text-[#3A2F26] dark:text-white">
+-                Continuous Learning & Best Practices
++                Continuous Technical Mastery & Architecture Standards
+               </h4>
+               <p className="text-xs text-[#9C8A6E] dark:text-[#B9A98C]">
+-                Active in open source, regular RFC authoring, code reviews, and staying on top of modern ECMAScript & cloud standards.
++                100% committed to type-safety, test-driven methodologies, microservice modularity, and high-performance user interfaces.
+               </p>
+             </div>
+           </div>
+           <a
+             href="#projects"
+-            className="shrink-0 px-4 py-2 text-xs font-semibold rounded-xl bg-[#EFE6D5] hover:bg-[#E4DBCB] dark:bg-[#4A3C31] dark:hover:bg-[#5C4B3A] text-[#4A3C31] dark:text-[#E4DBCB] transition-colors"
++            className="shrink-0 px-4 py-2.5 text-xs font-bold rounded-xl bg-[#B9861F] hover:bg-[#A2731A] text-white transition-colors shadow-xs"
+           >
+-            See Skills in Action →
++            Inspect Architectural Code →
+           </a>
+         </div>
+ 
+diff -ruN a2/src/components/TechLogo.tsx b2/src/components/TechLogo.tsx
+--- a2/src/components/TechLogo.tsx	1970-01-01 00:00:00.000000000 +0000
++++ b2/src/components/TechLogo.tsx	2026-08-29 14:40:37.955581099 +0000
+@@ -0,0 +1,310 @@
++import React from 'react';
++
++interface TechLogoProps {
++  name: string;
++  className?: string;
++  size?: number;
++}
++
++export const TechLogo: React.FC<TechLogoProps> = ({ name, className = 'w-6 h-6', size = 24 }) => {
++  const normName = name.toLowerCase().trim();
++
++  // TypeScript
++  if (normName.includes('typescript') || normName === 'ts') {
++    return (
++      <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none">
++        <rect width="24" height="24" rx="4" fill="#3178C6" />
++        <path d="M11.5 14.5C11.5 16.5 10 18 7.5 18C5.5 18 4.2 16.8 4 15.2L6 14.8C6.1 15.7 6.7 16.2 7.6 16.2C8.5 16.2 9.2 15.6 9.2 14.7C9.2 13.8 8.6 13.3 7.3 12.8L6.4 12.4C4.6 11.7 3.8 10.7 3.8 9.3C3.8 7.5 5.2 6 7.4 6C9.3 6 10.5 7.1 10.7 8.5L8.7 8.9C8.6 8.2 8.1 7.7 7.3 7.7C6.5 7.7 5.9 8.2 5.9 8.9C5.9 9.6 6.5 10 7.8 10.5L8.7 10.9C10.5 11.6 11.5 12.7 11.5 14.5Z" fill="white" />
++        <path d="M13 8H20V10H17.6V18H15.4V10H13V8Z" fill="white" />
++      </svg>
++    );
++  }
++
++  // React
++  if (normName.includes('react')) {
++    return (
++      <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none">
++        <ellipse cx="12" cy="12" rx="10" ry="4.2" stroke="#61DAFB" strokeWidth="1.6" transform="rotate(0 12 12)" />
++        <ellipse cx="12" cy="12" rx="10" ry="4.2" stroke="#61DAFB" strokeWidth="1.6" transform="rotate(60 12 12)" />
++        <ellipse cx="12" cy="12" rx="10" ry="4.2" stroke="#61DAFB" strokeWidth="1.6" transform="rotate(120 12 12)" />
++        <circle cx="12" cy="12" r="2.2" fill="#61DAFB" />
++      </svg>
++    );
++  }
++
++  // Next.js
++  if (normName.includes('next.js') || normName.includes('nextjs') || normName === 'next') {
++    return (
++      <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none">
++        <circle cx="12" cy="12" r="11" fill="#000000" stroke="#333333" strokeWidth="1" />
++        <path d="M7 7.5V16.5M7 7.5L16.2 19M15 7.5H17V13" stroke="white" strokeWidth="1.8" strokeLinecap="round" />
++      </svg>
++    );
++  }
++
++  // Tailwind CSS
++  if (normName.includes('tailwind')) {
++    return (
++      <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none">
++        <path d="M12.001 4.8c-3.2 0-5.2 1.6-6 4.8 1.2-1.6 2.6-2.2 4.2-1.8.913.228 1.565.89 2.288 1.624C13.666 10.618 15.027 12 18.001 12c3.2 0 5.2-1.6 6-4.8-1.2 1.6-2.6 2.2-4.2 1.8-.913-.228-1.565-.89-2.288-1.624C16.335 6.182 14.974 4.8 12.001 4.8zm-6 7.2c-3.2 0-5.2 1.6-6 4.8 1.2-1.6 2.6-2.2 4.2-1.8.913.228 1.565.89 2.288 1.624 1.177 1.194 2.538 2.576 5.512 2.576 3.2 0 5.2-1.6 6-4.8-1.2 1.6-2.6 2.2-4.2 1.8-.913-.228-1.565-.89-2.288-1.624C10.335 13.382 8.974 12 6.001 12z" fill="#38BDF8" />
++      </svg>
++    );
++  }
++
++  // Motion / Framer Motion
++  if (normName.includes('motion') || normName.includes('framer')) {
++    return (
++      <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none">
++        <path d="M4 2H20V9.5H12L4 2Z" fill="#0055FF" />
++        <path d="M4 9.5H12L20 17H12L4 9.5Z" fill="#FF0055" />
++        <path d="M4 17H12V22L4 17Z" fill="#FFCC00" />
++      </svg>
++    );
++  }
++
++  // Node.js
++  if (normName.includes('node')) {
++    return (
++      <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none">
++        <path d="M12 2L20.5 7V17L12 22L3.5 17V7L12 2Z" fill="#539E43" />
++        <path d="M12 4.5L18.5 8.2V15.8L12 19.5L5.5 15.8V8.2L12 4.5Z" fill="#333333" />
++        <path d="M12 7.5L16 9.8V14.2L12 16.5L8 14.2V9.8L12 7.5Z" fill="#68A063" />
++      </svg>
++    );
++  }
++
++  // Express / NestJS
++  if (normName.includes('express') || normName.includes('nestjs')) {
++    return (
++      <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none">
++        <rect width="24" height="24" rx="5" fill="#E0234E" />
++        <path d="M12 4L19 9V17L12 21L5 17V9L12 4Z" fill="white" />
++        <path d="M12 7L16.5 10.5V15.5L12 18L7.5 15.5V10.5L12 7Z" fill="#E0234E" />
++      </svg>
++    );
++  }
++
++  // PostgreSQL / Postgres
++  if (normName.includes('postgres') || normName.includes('psql') || normName.includes('pgvector')) {
++    return (
++      <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none">
++        <rect width="24" height="24" rx="4" fill="#336791" />
++        <path d="M12 4C7.58 4 4 7.58 4 12C4 16.42 7.58 20 12 20C16.42 20 20 16.42 20 12C20 7.58 16.42 4 12 4ZM12 6C15.31 6 18 8.69 18 12C18 13.82 17.18 15.45 15.9 16.55L14.75 14.5C15.53 13.8 16 12.95 16 12C16 9.79 14.21 8 12 8C9.79 8 8 9.79 8 12C8 12.95 8.47 13.8 9.25 14.5L8.1 16.55C6.82 15.45 6 13.82 6 12C6 8.69 8.69 6 12 6Z" fill="white" />
++      </svg>
++    );
++  }
++
++  // Go / Golang
++  if (normName.includes('go') || normName.includes('golang')) {
++    return (
++      <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none">
++        <rect width="24" height="24" rx="4" fill="#00ACD7" />
++        <path d="M6 12C6 9.79 7.79 8 10 8C11.5 8 12.8 8.8 13.5 10L11.8 11C11.4 10.4 10.7 10 10 10C8.9 10 8 10.9 8 12C8 13.1 8.9 14 10 14C10.7 14 11.3 13.7 11.7 13.2H10V11.5H13.8V14.5C12.9 15.4 11.5 16 10 16C7.79 16 6 14.21 6 12Z" fill="white" />
++        <path d="M16 8H18V16H16V8Z" fill="white" />
++      </svg>
++    );
++  }
++
++  // Redis
++  if (normName.includes('redis')) {
++    return (
++      <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none">
++        <rect width="24" height="24" rx="4" fill="#DC382D" />
++        <path d="M12 5L4.5 9L12 13L19.5 9L12 5Z" fill="white" />
++        <path d="M4.5 11.5L12 15.5L19.5 11.5V14.5L12 18.5L4.5 14.5V11.5Z" fill="white" />
++      </svg>
++    );
++  }
++
++  // GraphQL
++  if (normName.includes('graphql')) {
++    return (
++      <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none">
++        <path d="M12 2L20.66 7V17L12 22L3.34 17V7L12 2Z" stroke="#E10098" strokeWidth="2" fill="none" />
++        <circle cx="12" cy="2" r="2" fill="#E10098" />
++        <circle cx="20.66" cy="7" r="2" fill="#E10098" />
++        <circle cx="20.66" cy="17" r="2" fill="#E10098" />
++        <circle cx="12" cy="22" r="2" fill="#E10098" />
++        <circle cx="3.34" cy="17" r="2" fill="#E10098" />
++        <circle cx="3.34" cy="7" r="2" fill="#E10098" />
++        <path d="M12 2L12 22M20.66 7L3.34 17M20.66 17L3.34 7" stroke="#E10098" strokeWidth="1.2" />
++      </svg>
++    );
++  }
++
++  // Docker
++  if (normName.includes('docker') || normName.includes('container')) {
++    return (
++      <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none">
++        <rect width="24" height="24" rx="4" fill="#2496ED" />
++        <rect x="5" y="10" width="2" height="2" fill="white" />
++        <rect x="8" y="10" width="2" height="2" fill="white" />
++        <rect x="11" y="10" width="2" height="2" fill="white" />
++        <rect x="8" y="7" width="2" height="2" fill="white" />
++        <rect x="11" y="7" width="2" height="2" fill="white" />
++        <path d="M4 13C4 16.5 7 18 12 18C17 18 19.5 15.5 20 14C19 14.2 18 14 18 14C18 14 19 13 19 12C17 12 16 13 16 13C15 13 13 13 12 13H4Z" fill="white" />
++      </svg>
++    );
++  }
++
++  // AWS
++  if (normName.includes('aws') || normName.includes('amazon')) {
++    return (
++      <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none">
++        <rect width="24" height="24" rx="4" fill="#232F3E" />
++        <path d="M6.5 11.5L8.5 7.5H10L12 11.5H10.5L10 10.5H8.5L8 11.5H6.5ZM8.8 9.5H9.7L9.2 8.3L8.8 9.5ZM13 11.5L12 7.5H13.5L14.2 10.3L15 7.5H16.2L17 10.3L17.7 7.5H19L18 11.5H16.8L16.1 8.8L15.3 11.5H14.3L13.6 8.8L13 11.5Z" fill="white" />
++        <path d="M6 14.5C10 17 14 17 18 14.5M17.5 13.5L18.5 14.5L17.5 15.5" stroke="#FF9900" strokeWidth="1.5" strokeLinecap="round" />
++      </svg>
++    );
++  }
++
++  // Google Cloud Platform (GCP)
++  if (normName.includes('gcp') || normName.includes('google cloud')) {
++    return (
++      <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none">
++        <rect width="24" height="24" rx="4" fill="#4285F4" />
++        <path d="M12 7C9.24 7 7 9.24 7 12C7 14.76 9.24 17 12 17C14.76 17 17 14.76 17 12H12V9.5H19.3C19.45 10.3 19.5 11.15 19.5 12C19.5 16.14 16.14 19.5 12 19.5C7.86 19.5 4.5 16.14 4.5 12C4.5 7.86 7.86 4.5 12 4.5C14.1 4.5 15.95 5.25 17.35 6.55L15.4 8.5C14.5 7.6 13.35 7 12 7Z" fill="white" />
++      </svg>
++    );
++  }
++
++  // CI/CD / GitHub Actions
++  if (normName.includes('ci/cd') || normName.includes('github actions') || normName.includes('actions')) {
++    return (
++      <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none">
++        <rect width="24" height="24" rx="4" fill="#2088FF" />
++        <path d="M6 12L10 16L18 8" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
++      </svg>
++    );
++  }
++
++  // Kubernetes
++  if (normName.includes('kubernetes') || normName.includes('k8s') || normName.includes('helm')) {
++    return (
++      <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none">
++        <rect width="24" height="24" rx="4" fill="#326CE5" />
++        <circle cx="12" cy="12" r="4.5" stroke="white" strokeWidth="1.8" fill="none" />
++        <path d="M12 4.5V7.5M12 16.5V19.5M4.5 12H7.5M16.5 12H19.5M6.5 6.5L8.5 8.5M15.5 15.5L17.5 17.5M6.5 17.5L8.5 15.5M15.5 8.5L17.5 6.5" stroke="white" strokeWidth="1.8" strokeLinecap="round" />
++      </svg>
++    );
++  }
++
++  // LLM & Gemini / AI / Machine Learning
++  if (normName.includes('gemini') || normName.includes('llm') || normName.includes('ai')) {
++    return (
++      <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none">
++        <defs>
++          <linearGradient id="geminiGrad" x1="0%" y1="0%" x2="100%" y2="100%">
++            <stop offset="0%" stopColor="#4E82EE" />
++            <stop offset="50%" stopColor="#9B72CF" />
++            <stop offset="100%" stopColor="#FF7769" />
++          </linearGradient>
++        </defs>
++        <rect width="24" height="24" rx="5" fill="url(#geminiGrad)" />
++        <path d="M12 4C12 8.418 8.418 12 4 12C8.418 12 12 15.582 12 20C12 15.582 15.582 12 20 12C15.582 12 12 8.418 12 4Z" fill="white" />
++      </svg>
++    );
++  }
++
++  // Vector DB / Pinecone
++  if (normName.includes('vector') || normName.includes('pinecone')) {
++    return (
++      <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none">
++        <rect width="24" height="24" rx="4" fill="#000000" />
++        <circle cx="7" cy="7" r="2.5" fill="#10B981" />
++        <circle cx="17" cy="7" r="2.5" fill="#6366F1" />
++        <circle cx="12" cy="17" r="2.5" fill="#F43F5E" />
++        <line x1="7" y1="7" x2="17" y2="7" stroke="#64748B" strokeWidth="1.2" strokeDasharray="2 2" />
++        <line x1="7" y1="7" x2="12" y2="17" stroke="#64748B" strokeWidth="1.2" strokeDasharray="2 2" />
++        <line x1="17" y1="7" x2="12" y2="17" stroke="#64748B" strokeWidth="1.2" strokeDasharray="2 2" />
++      </svg>
++    );
++  }
++
++  // Testing (Jest, Vitest, Playwright)
++  if (normName.includes('test') || normName.includes('vitest') || normName.includes('jest') || normName.includes('playwright')) {
++    return (
++      <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none">
++        <rect width="24" height="24" rx="4" fill="#729B1B" />
++        <path d="M12 5L18 8.5V15.5L12 19L6 15.5V8.5L12 5Z" stroke="white" strokeWidth="1.8" fill="none" />
++        <path d="M9.5 12L11 13.5L14.5 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
++      </svg>
++    );
++  }
++
++  // Git / GitHub / Trunk
++  if (normName.includes('git')) {
++    return (
++      <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none">
++        <rect width="24" height="24" rx="4" fill="#F05032" />
++        <path d="M19 11.5L12.5 5C12.1 4.6 11.5 4.6 11.1 5L10.3 5.8L12 7.5C12.6 7.3 13.3 7.5 13.7 8C14.2 8.5 14.3 9.2 14.1 9.8L15.8 11.5C16.4 11.3 17.1 11.4 17.6 11.9C18.2 12.5 18.2 13.5 17.6 14.1C17 14.7 16 14.7 15.4 14.1C15 13.7 14.8 13.1 14.9 12.5L13.3 10.9V14.6C13.5 14.8 13.7 15.1 13.7 15.5C13.7 16.3 13 17 12.2 17C11.4 17 10.7 16.3 10.7 15.5C10.7 14.9 11.1 14.4 11.6 14.2V9.8L9.8 11.6C9.6 12.1 9.1 12.5 8.5 12.5C7.7 12.5 7 11.8 7 11C7 10.4 7.4 9.9 7.9 9.7L11.1 6.5L5 12.6C4.6 13 4.6 13.6 5 14L11.5 20.5C11.9 20.9 12.5 20.9 12.9 20.5L19 14.4C19.4 14 19.4 13.4 19 13L19 11.5Z" fill="white" />
++      </svg>
++    );
++  }
++
++  // System Design / Architecture
++  if (normName.includes('system') || normName.includes('architecture') || normName.includes('design')) {
++    return (
++      <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none">
++        <rect width="24" height="24" rx="4" fill="#6366F1" />
++        <rect x="5" y="5" width="5" height="5" rx="1" stroke="white" strokeWidth="1.5" />
++        <rect x="14" y="5" width="5" height="5" rx="1" stroke="white" strokeWidth="1.5" />
++        <rect x="9.5" y="14" width="5" height="5" rx="1" stroke="white" strokeWidth="1.5" />
++        <path d="M7.5 10V12H16.5V10M12 12V14" stroke="white" strokeWidth="1.5" />
++      </svg>
++    );
++  }
++
++  // State Management (Zustand, Redux)
++  if (normName.includes('state') || normName.includes('redux') || normName.includes('zustand')) {
++    return (
++      <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none">
++        <rect width="24" height="24" rx="4" fill="#764ABC" />
++        <circle cx="12" cy="12" r="3" fill="white" />
++        <ellipse cx="12" cy="12" rx="7" ry="3" stroke="white" strokeWidth="1.2" transform="rotate(30 12 12)" />
++        <ellipse cx="12" cy="12" rx="7" ry="3" stroke="white" strokeWidth="1.2" transform="rotate(-30 12 12)" />
++      </svg>
++    );
++  }
++
++  // Web Performance / Accessibility (a11y)
++  if (normName.includes('performance') || normName.includes('accessibility') || normName.includes('a11y')) {
++    return (
++      <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none">
++        <rect width="24" height="24" rx="4" fill="#10B981" />
++        <circle cx="12" cy="7" r="2.5" fill="white" />
++        <path d="M5 11H19M12 11V20M9 20L12 15L15 20" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
++      </svg>
++    );
++  }
++
++  // Monitoring / Datadog
++  if (normName.includes('monitoring') || normName.includes('datadog') || normName.includes('observability')) {
++    return (
++      <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none">
++        <rect width="24" height="24" rx="4" fill="#632CA6" />
++        <path d="M6 18L10 12L14 15L18 8" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
++        <circle cx="18" cy="8" r="1.5" fill="#F43F5E" />
++      </svg>
++    );
++  }
++
++  // Python
++  if (normName.includes('python')) {
++    return (
++      <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none">
++        <rect width="24" height="24" rx="4" fill="#3776AB" />
++        <path d="M11.5 6H13C14.5 6 15.5 7 15.5 8.5V10H10V11H17C18 11 19 12 19 13.5V15C19 16.5 18 17.5 16.5 17.5H15V16C15 14.5 14 13.5 12.5 13.5H10C8.5 13.5 7.5 12.5 7.5 11V9.5C7.5 8 8.5 7 10 7H11.5V6Z" fill="#FFD43B" />
++        <circle cx="10.5" cy="8.5" r="1" fill="#3776AB" />
++      </svg>
++    );
++  }
++
++  // Default fallback badge with nice typography
++  const initials = name.slice(0, 2).toUpperCase();
++  return (
++    <div className={`flex items-center justify-center rounded-lg bg-[#B9861F] text-white font-mono font-bold text-xs shadow-xs ${className}`}>
++      {initials}
++    </div>
++  );
++};
+diff -ruN a2/src/components/TerminalModal.tsx b2/src/components/TerminalModal.tsx
+--- a2/src/components/TerminalModal.tsx	1970-01-01 00:00:00.000000000 +0000
++++ b2/src/components/TerminalModal.tsx	2026-08-29 14:40:37.955325893 +0000
+@@ -0,0 +1,390 @@
++import React, { useState, useEffect, useRef } from 'react';
++import { 
++  Terminal as TerminalIcon, 
++  X, 
++  Minus, 
++  Square, 
++  CornerDownLeft, 
++  Sparkles,
++  HelpCircle,
++  Copy,
++  Check
++} from 'lucide-react';
++import { ProfileData, Project } from '../types';
++
++interface TerminalModalProps {
++  isOpen: boolean;
++  onClose: () => void;
++  profile: ProfileData;
++  onOpenResume: () => void;
++  onToggleTheme: () => void;
++  onSelectProject: (project: Project) => void;
++}
++
++interface CommandHistoryItem {
++  id: string;
++  command: string;
++  output: React.ReactNode;
++  timestamp: string;
++}
++
++export const TerminalModal: React.FC<TerminalModalProps> = ({
++  isOpen,
++  onClose,
++  profile,
++  onOpenResume,
++  onToggleTheme,
++  onSelectProject,
++}) => {
++  const [inputVal, setInputVal] = useState('');
++  const [history, setHistory] = useState<CommandHistoryItem[]>([]);
++  const [copiedEmail, setCopiedEmail] = useState(false);
++  const inputRef = useRef<HTMLInputElement>(null);
++  const bottomRef = useRef<HTMLDivElement>(null);
++
++  // Initial welcome message
++  useEffect(() => {
++    if (isOpen && history.length === 0) {
++      setHistory([
++        {
++          id: 'welcome',
++          command: 'init',
++          timestamp: new Date().toLocaleTimeString(),
++          output: (
++            <div className="space-y-2 text-[#D3C6AF]">
++              <p className="text-emerald-400 font-bold">
++                🚀 Welcome to Noah's Interactive Terminal CLI (v2.4.0)
++              </p>
++              <p className="text-xs text-[#B9A98C]">
++                Type <span className="text-[#D9A62E] font-mono font-semibold">help</span> to view available commands, or try <span className="text-[#D9A62E] font-mono">skills</span>, <span className="text-[#D9A62E] font-mono">projects</span>, or <span className="text-[#D9A62E] font-mono">sudo hire</span>.
++              </p>
++            </div>
++          ),
++        },
++      ]);
++    }
++    if (isOpen) {
++      setTimeout(() => {
++        inputRef.current?.focus();
++      }, 50);
++    }
++  }, [isOpen]);
++
++  useEffect(() => {
++    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
++  }, [history]);
++
++  const handleCommand = (rawCmd: string) => {
++    const cmd = rawCmd.trim().toLowerCase();
++    if (!cmd) return;
++
++    const timestamp = new Date().toLocaleTimeString();
++    let output: React.ReactNode = null;
++
++    switch (cmd) {
++      case 'help':
++      case '?':
++        output = (
++          <div className="space-y-1.5 text-xs text-[#D3C6AF] font-mono">
++            <p className="text-amber-300 font-semibold mb-1">Available Commands:</p>
++            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1">
++              <div><span className="text-[#D9A62E] font-bold">whoami / bio</span> : Executive overview</div>
++              <div><span className="text-[#D9A62E] font-bold">skills</span> : Tech stack breakdown</div>
++              <div><span className="text-[#D9A62E] font-bold">projects</span> : Shipped architectures</div>
++              <div><span className="text-[#D9A62E] font-bold">experience</span> : Career history</div>
++              <div><span className="text-[#D9A62E] font-bold">stats</span> : Engineering metrics</div>
++              <div><span className="text-[#D9A62E] font-bold">contact</span> : Email & social links</div>
++              <div><span className="text-[#D9A62E] font-bold">resume</span> : View & download CV</div>
++              <div><span className="text-[#D9A62E] font-bold">theme</span> : Toggle Light / Dark mode</div>
++              <div><span className="text-[#D9A62E] font-bold">sudo hire</span> : Start an inquiry</div>
++              <div><span className="text-[#D9A62E] font-bold">clear</span> : Clear terminal screen</div>
++              <div><span className="text-[#D9A62E] font-bold">exit</span> : Close terminal</div>
++            </div>
++          </div>
++        );
++        break;
++
++      case 'whoami':
++      case 'bio':
++      case 'about':
++        output = (
++          <div className="space-y-2 text-xs text-[#D3C6AF]">
++            <div className="text-sm font-bold text-white flex items-center gap-2">
++              <span>{profile.name}</span>
++              <span className="text-[#D9A62E] text-xs font-mono">({profile.title})</span>
++            </div>
++            <p className="text-[#D3C6AF] leading-relaxed">{profile.headline}</p>
++            <p className="text-[#B9A98C]">📍 {profile.location} • Status: {profile.availability}</p>
++          </div>
++        );
++        break;
++
++      case 'skills':
++      case 'stack':
++        output = (
++          <div className="space-y-3 text-xs">
++            {profile.skillCategories.map((cat, i) => (
++              <div key={i} className="space-y-1">
++                <div className="text-[#D9A62E] font-bold font-mono">▸ {cat.title}:</div>
++                <div className="text-[#D3C6AF] pl-4 font-mono">
++                  {cat.skills.map((s) => `${s.name} (${s.level}%)`).join(' • ')}
++                </div>
++              </div>
++            ))}
++          </div>
++        );
++        break;
++
++      case 'projects':
++      case 'work':
++        output = (
++          <div className="space-y-3 text-xs">
++            <div className="text-[#B9A98C] mb-1">Click any project to inspect its architecture:</div>
++            {profile.projects.map((p) => (
++              <div
++                key={p.id}
++                onClick={() => {
++                  onSelectProject(p);
++                  onClose();
++                }}
++                className="p-2 rounded bg-[#3A2F26]/80 border border-[#4A3C31] hover:border-[#CC9A24] cursor-pointer transition-colors"
++              >
++                <div className="flex items-center justify-between">
++                  <span className="font-bold text-white hover:text-[#D9A62E]">{p.title}</span>
++                  <span className="text-[10px] font-mono text-emerald-400">{p.category}</span>
++                </div>
++                <p className="text-[#B9A98C] text-[11px] mt-0.5">{p.subtitle}</p>
++                <p className="text-[10px] font-mono text-[#DFB94A] mt-1">Stack: {p.tags.join(', ')}</p>
++              </div>
++            ))}
++          </div>
++        );
++        break;
++
++      case 'stats':
++        output = (
++          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono">
++            <div className="p-2 rounded bg-[#3A2F26] border border-[#4A3C31]">
++              <span className="text-[#B9A98C] block text-[10px]">EXPERIENCE</span>
++              <span className="text-base font-bold text-white">{profile.stats.yearsExperience}+ Years</span>
++            </div>
++            <div className="p-2 rounded bg-[#3A2F26] border border-[#4A3C31]">
++              <span className="text-[#B9A98C] block text-[10px]">PROJECTS</span>
++              <span className="text-base font-bold text-white">{profile.stats.completedProjects}+ Shipped</span>
++            </div>
++            <div className="p-2 rounded bg-[#3A2F26] border border-[#4A3C31]">
++              <span className="text-[#B9A98C] block text-[10px]">COMMITS</span>
++              <span className="text-base font-bold text-white">{profile.stats.codeContributions} /yr</span>
++            </div>
++            <div className="p-2 rounded bg-[#3A2F26] border border-[#4A3C31]">
++              <span className="text-[#B9A98C] block text-[10px]">LIVE SITES</span>
++              <span className="text-base font-bold text-emerald-400">2 In Prod</span>
++            </div>
++          </div>
++        );
++        break;
++
++      case 'experience':
++      case 'career':
++        output = (
++          <div className="space-y-2 text-xs">
++            {profile.experiences.map((exp) => (
++              <div key={exp.id} className="p-2 rounded bg-[#3A2F26] border border-[#4A3C31]">
++                <div className="flex justify-between items-center text-white font-bold">
++                  <span>{exp.role} @ {exp.company}</span>
++                  <span className="text-[#B9A98C] font-mono text-[10px]">{exp.period}</span>
++                </div>
++                <p className="text-[#B9A98C] text-[11px] mt-1">{exp.description[0]}</p>
++              </div>
++            ))}
++          </div>
++        );
++        break;
++
++      case 'contact':
++      case 'email':
++        output = (
++          <div className="space-y-2 text-xs font-mono text-[#D3C6AF]">
++            <p>✉️ Email: <span className="text-[#D9A62E]">{profile.email}</span></p>
++            <p>📍 Location: <span className="text-[#D3C6AF]">{profile.location}</span></p>
++            <div className="flex flex-wrap gap-3 pt-1">
++              {profile.socialLinks.map((s) => (
++                <a
++                  key={s.platform}
++                  href={s.url}
++                  target="_blank"
++                  rel="noreferrer"
++                  className="text-[#D9A62E] hover:underline"
++                >
++                  [{s.label}]
++                </a>
++              ))}
++            </div>
++          </div>
++        );
++        break;
++
++      case 'resume':
++      case 'cv':
++        output = <p className="text-xs text-emerald-400 font-mono">Opening complete resume view...</p>;
++        setTimeout(() => {
++          onClose();
++          onOpenResume();
++        }, 500);
++        break;
++
++      case 'theme':
++        onToggleTheme();
++        output = <p className="text-xs text-amber-300 font-mono">Theme toggled successfully.</p>;
++        break;
++
++      case 'sudo hire':
++      case 'hire':
++        output = (
++          <div className="p-3 rounded-lg bg-emerald-950/60 border border-emerald-800 text-xs text-emerald-300 font-mono space-y-2">
++            <p className="font-bold">✨ Access Granted: Initiating direct collaboration sequence...</p>
++            <p>Direct Email: <span className="text-white underline">{profile.email}</span></p>
++            <p className="text-[#B9A98C]">{profile.availability}.</p>
++            <button
++              onClick={() => {
++                onClose();
++                document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
++              }}
++              className="px-3 py-1.5 rounded bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-500 transition-colors"
++            >
++              Open Contact Form →
++            </button>
++          </div>
++        );
++        break;
++
++      case 'clear':
++      case 'cls':
++        setHistory([]);
++        setInputVal('');
++        return;
++
++      case 'exit':
++      case 'quit':
++        onClose();
++        return;
++
++      default:
++        output = (
++          <p className="text-xs text-[#C1613F] font-mono">
++            zsh: command not found: {rawCmd}. Type <span className="text-[#DFB94A] font-bold">help</span> to list commands.
++          </p>
++        );
++    }
++
++    setHistory((prev) => [
++      ...prev,
++      {
++        id: Math.random().toString(),
++        command: rawCmd,
++        output,
++        timestamp,
++      },
++    ]);
++    setInputVal('');
++  };
++
++  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
++    if (e.key === 'Enter') {
++      handleCommand(inputVal);
++    }
++  };
++
++  if (!isOpen) return null;
++
++  return (
++    <div
++      id="terminal-modal-backdrop"
++      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#2A211C]/75 backdrop-blur-md animate-in fade-in duration-200"
++      onClick={onClose}
++    >
++      <div
++        id="terminal-window"
++        onClick={(e) => e.stopPropagation()}
++        className="w-full max-w-2xl bg-[#2A211C] text-[#EFE6D5] rounded-2xl border border-[#4A3C31] shadow-2xl overflow-hidden flex flex-col h-[520px] font-mono"
++      >
++        {/* macOS Style Window Header */}
++        <div className="flex items-center justify-between px-4 py-3 bg-[#3A2F26] border-b border-[#4A3C31] select-none">
++          <div className="flex items-center gap-2">
++            <button
++              onClick={onClose}
++              className="w-3 h-3 rounded-full bg-[#A8432F] hover:bg-[#8F3623] transition-colors"
++              title="Close"
++            />
++            <button
++              onClick={() => setHistory([])}
++              className="w-3 h-3 rounded-full bg-amber-500 hover:bg-amber-600 transition-colors"
++              title="Clear"
++            />
++            <button
++              onClick={onToggleTheme}
++              className="w-3 h-3 rounded-full bg-emerald-500 hover:bg-emerald-600 transition-colors"
++              title="Toggle Theme"
++            />
++            <span className="ml-2 text-xs font-semibold text-[#B9A98C]">
++              guest@noah-portfolio: ~
++            </span>
++          </div>
++
++          <div className="flex items-center gap-3 text-xs text-[#9C8A6E]">
++            <span className="hidden sm:inline">zsh 5.9</span>
++            <button
++              onClick={onClose}
++              className="p-1 rounded text-[#B9A98C] hover:text-white"
++            >
++              <X className="w-4 h-4" />
++            </button>
++          </div>
++        </div>
++
++        {/* Terminal Body Screen */}
++        <div
++          id="terminal-output-screen"
++          className="flex-1 p-4 sm:p-5 overflow-y-auto space-y-4 text-xs sm:text-sm font-mono scrollbar-none"
++        >
++          {history.map((item) => (
++            <div key={item.id} className="space-y-1.5">
++              <div className="flex items-center gap-2 text-[#B9A98C] text-xs">
++                <span className="text-emerald-400">guest@portfolio</span>
++                <span className="text-[#D9A62E]">~</span>
++                <span className="text-[#9C8A6E]">$</span>
++                <span className="text-white font-semibold">{item.command}</span>
++              </div>
++              <div className="pl-3 border-l border-[#4A3C31]">{item.output}</div>
++            </div>
++          ))}
++          <div ref={bottomRef} />
++        </div>
++
++        {/* Command Input Prompt Bar */}
++        <div className="p-3 bg-[#3A2F26]/90 border-t border-[#4A3C31] flex items-center gap-2">
++          <span className="text-emerald-400 text-xs font-bold shrink-0">noah $</span>
++          <input
++            ref={inputRef}
++            id="terminal-command-input"
++            type="text"
++            placeholder="Type 'help', 'skills', 'projects', 'sudo hire'..."
++            value={inputVal}
++            onChange={(e) => setInputVal(e.target.value)}
++            onKeyDown={handleKeyDown}
++            className="w-full bg-transparent text-white font-mono text-xs sm:text-sm focus:outline-none placeholder:text-[#7A6B58]"
++            autoFocus
++          />
++          <button
++            id="terminal-submit-btn"
++            onClick={() => handleCommand(inputVal)}
++            className="p-1.5 rounded-lg bg-[#B9861F] hover:bg-[#CC9A24] text-white transition-colors"
++            title="Execute"
++          >
++            <CornerDownLeft className="w-3.5 h-3.5" />
++          </button>
++        </div>
++      </div>
++    </div>
++  );
++};
+diff -ruN a2/src/index.css b2/src/index.css
+--- a2/src/index.css	2026-08-29 14:40:37.950692463 +0000
++++ b2/src/index.css	2026-08-29 14:40:37.955692889 +0000
+@@ -1 +1,60 @@
+ @import "tailwindcss";
++
++@layer utilities {
++  /* Subtle modern grid patterns */
++  .bg-grid-pattern {
++    background-size: 32px 32px;
++    background-image: 
++      linear-gradient(to right, rgba(185, 169, 140, 0.08) 1px, transparent 1px),
++      linear-gradient(to bottom, rgba(185, 169, 140, 0.08) 1px, transparent 1px);
++  }
++
++  .dark .bg-grid-pattern {
++    background-size: 32px 32px;
++    background-image: 
++      linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
++      linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
++  }
++
++  .bg-dot-pattern {
++    background-size: 24px 24px;
++    background-image: radial-gradient(rgba(185, 169, 140, 0.2) 1px, transparent 1px);
++  }
++
++  .dark .bg-dot-pattern {
++    background-size: 24px 24px;
++    background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
++  }
++
++  .glass-card {
++    backdrop-filter: blur(12px);
++    -webkit-backdrop-filter: blur(12px);
++  }
++}
++
++/* Smooth custom scrollbars */
++::-webkit-scrollbar {
++  width: 8px;
++  height: 8px;
++}
++
++::-webkit-scrollbar-track {
++  background: transparent;
++}
++
++::-webkit-scrollbar-thumb {
++  background: rgba(185, 169, 140, 0.3);
++  border-radius: 4px;
++}
++
++.dark ::-webkit-scrollbar-thumb {
++  background: rgba(255, 255, 255, 0.15);
++}
++
++::-webkit-scrollbar-thumb:hover {
++  background: rgba(185, 169, 140, 0.5);
++}
++
++.dark ::-webkit-scrollbar-thumb:hover {
++  background: rgba(255, 255, 255, 0.25);
++}

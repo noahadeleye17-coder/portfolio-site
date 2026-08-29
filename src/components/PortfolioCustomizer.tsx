@@ -14,8 +14,9 @@ import {
   Cpu,
   Layers
 } from 'lucide-react';
-import { ProfileData, Project } from '../types';
+import { ProfileData, Project, SkillCategory } from '../types';
 import { defaultPortfolioData } from '../data/initialPortfolio';
+import { TechLogo } from './TechLogo';
 
 interface PortfolioCustomizerProps {
   isOpen: boolean;
@@ -34,7 +35,7 @@ export const PortfolioCustomizer: React.FC<PortfolioCustomizerProps> = ({
 }) => {
   const [formData, setFormData] = useState<ProfileData>(profile);
   const [savedToast, setSavedToast] = useState(false);
-  const [activeTab, setActiveTab] = useState<'profile' | 'projects'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'projects' | 'skills'>('profile');
 
   if (!isOpen) return null;
 
@@ -147,13 +148,23 @@ export const PortfolioCustomizer: React.FC<PortfolioCustomizerProps> = ({
                 : 'border-transparent text-[#9C8A6E] hover:text-[#3A2F26] dark:hover:text-white'
             }`}
           >
-            Projects List ({formData.projects.length})
+            Projects ({formData.projects.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('skills')}
+            className={`pb-2.5 px-3 text-xs font-bold border-b-2 transition-colors ${
+              activeTab === 'skills'
+                ? 'border-[#B9861F] text-[#B9861F] dark:text-[#D9A62E]'
+                : 'border-transparent text-[#9C8A6E] hover:text-[#3A2F26] dark:hover:text-white'
+            }`}
+          >
+            Skills & Percentages
           </button>
         </div>
 
         {/* Form Body */}
         <div className="flex-1 p-6 overflow-y-auto space-y-5">
-          {activeTab === 'profile' ? (
+          {activeTab === 'profile' && (
             <>
               {/* Full Name */}
               <div>
@@ -277,7 +288,9 @@ export const PortfolioCustomizer: React.FC<PortfolioCustomizerProps> = ({
                 </div>
               </div>
             </>
-          ) : (
+          )}
+
+          {activeTab === 'projects' && (
             <div className="space-y-4">
               <p className="text-xs text-[#9C8A6E]">
                 You can inspect or quick-edit project titles and categories:
@@ -312,6 +325,68 @@ export const PortfolioCustomizer: React.FC<PortfolioCustomizerProps> = ({
                     }}
                     className="w-full text-xs text-[#7A6B58] dark:text-[#D3C6AF] bg-transparent border-b border-dashed border-[#E4DBCB] dark:border-[#5C4B3A] focus:outline-none"
                   />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {activeTab === 'skills' && (
+            <div className="space-y-6">
+              <p className="text-xs text-[#9C8A6E]">
+                Adjust proficiency percentage and experience for any technology:
+              </p>
+              {formData.skillCategories.map((cat, catIdx) => (
+                <div key={catIdx} className="space-y-3">
+                  <div className="text-xs font-bold text-[#4A3C31] dark:text-[#E4DBCB] uppercase tracking-wider border-b border-[#E4DBCB] dark:border-[#4A3C31] pb-1">
+                    {cat.title}
+                  </div>
+                  <div className="space-y-3">
+                    {cat.skills.map((skill, skillIdx) => (
+                      <div
+                        key={skillIdx}
+                        className="p-3 rounded-xl bg-[#F7F2E9] dark:bg-[#4A3C31]/60 border border-[#E4DBCB] dark:border-[#5C4B3A]/80 space-y-2"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <TechLogo name={skill.name} size={20} />
+                            <span className="font-semibold text-xs text-[#3A2F26] dark:text-white">
+                              {skill.name}
+                            </span>
+                          </div>
+                          <span className="text-xs font-mono font-bold text-[#B9861F] dark:text-[#D9A62E]">
+                            {skill.level}%
+                          </span>
+                        </div>
+
+                        {/* Interactive Slider */}
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="range"
+                            min={50}
+                            max={100}
+                            value={skill.level}
+                            onChange={(e) => {
+                              const newCategories = [...formData.skillCategories];
+                              newCategories[catIdx].skills[skillIdx].level = parseInt(e.target.value, 10);
+                              setFormData({ ...formData, skillCategories: newCategories });
+                            }}
+                            className="flex-1 accent-indigo-600 h-1.5 bg-[#E4DBCB] dark:bg-[#5C4B3A] rounded-lg cursor-pointer"
+                          />
+                          <input
+                            type="text"
+                            value={skill.experience}
+                            onChange={(e) => {
+                              const newCategories = [...formData.skillCategories];
+                              newCategories[catIdx].skills[skillIdx].experience = e.target.value;
+                              setFormData({ ...formData, skillCategories: newCategories });
+                            }}
+                            className="w-16 px-1.5 py-0.5 text-[11px] font-mono text-center rounded bg-white dark:bg-[#3A2F26] border border-[#E4DBCB] dark:border-[#5C4B3A]"
+                            title="Years of experience"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               ))}
             </div>
