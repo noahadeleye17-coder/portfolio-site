@@ -115,7 +115,7 @@ export default function App() {
       />
 
       {/* Main Content Sections */}
-      <main className="flex-grow">
+      <main className="grow">
         {/* Hero Section */}
         <Hero
           profile={profile}
