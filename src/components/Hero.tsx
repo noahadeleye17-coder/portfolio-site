@@ -82,10 +82,10 @@ export const Hero: React.FC<HeroProps> = ({
     <section id="hero" className="relative pt-24 sm:pt-28 lg:pt-20 pb-16 sm:pb-20 lg:pb-16 overflow-hidden bg-grid-pattern">
       <div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-emerald-500 via-[#CC9A24] to-sky-500" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16">
+        <div className="flex flex-col lg:flex-row items-center lg:items-start justify-between gap-12 lg:gap-16">
           
           {/* Left Column: Introduction & Call to Actions */}
-          <div className="flex-1 text-center lg:text-left">
+          <div className="flex-1 text-center lg:text-left lg:pt-12">
             
             {/* Status & Availability Pills */}
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 mb-6">
