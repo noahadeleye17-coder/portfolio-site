@@ -21,7 +21,7 @@ import { defaultPortfolioData } from './data/initialPortfolio';
 import { ProfileData, Project } from './types';
 import { Command, Terminal } from 'lucide-react';
 
-const STORAGE_KEY_PROFILE = 'portfolio_profile_data_v1';
+const STORAGE_KEY_PROFILE = 'portfolio_profile_data_v2';
 const STORAGE_KEY_THEME = 'portfolio_theme_mode';
 
 export default function App() {

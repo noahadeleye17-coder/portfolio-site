@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { 
   Mail, 
-  Send, 
   MapPin, 
   Check, 
   Copy, 
@@ -9,11 +8,7 @@ import {
   Linkedin, 
   Twitter, 
   ExternalLink, 
-  Sparkles, 
-  Clock, 
-  MessageSquare,
-  AlertCircle,
-  Phone
+  Clock
 } from 'lucide-react';
 import { ProfileData } from '../types';
 
@@ -23,62 +18,11 @@ interface ContactProps {
 
 export const Contact: React.FC<ContactProps> = ({ profile }) => {
   const [copiedEmail, setCopiedEmail] = useState(false);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    subject: 'Project Inquiry',
-    message: '',
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submittedSuccess, setSubmittedSuccess] = useState(false);
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   const handleCopyEmail = () => {
     navigator.clipboard.writeText(profile.email);
     setCopiedEmail(true);
     setTimeout(() => setCopiedEmail(false), 2500);
-  };
-
-  const validateForm = () => {
-    const errors: Record<string, string> = {};
-    if (!formData.name.trim()) {
-      errors.name = 'Please enter your name.';
-    }
-    if (!formData.email.trim()) {
-      errors.email = 'Please enter your email address.';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      errors.email = 'Please enter a valid email address.';
-    }
-    if (!formData.message.trim() || formData.message.length < 10) {
-      errors.message = 'Please provide a message of at least 10 characters.';
-    }
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-
-    setIsSubmitting(true);
-    const subject = encodeURIComponent(`${formData.subject} from ${formData.name}`);
-    const body = encodeURIComponent(
-      `${formData.message}\n\nFrom: ${formData.name}\nReply-to: ${formData.email}`
-    );
-    window.location.href = `mailto:${profile.email}?subject=${subject}&body=${body}`;
-    setIsSubmitting(false);
-    setSubmittedSuccess(true);
-  };
-
-  const handleResetForm = () => {
-    setFormData({
-      name: '',
-      email: '',
-      subject: 'Project Inquiry',
-      message: '',
-    });
-    setSubmittedSuccess(false);
-    setFormErrors({});
   };
 
   return (
@@ -95,14 +39,14 @@ export const Contact: React.FC<ContactProps> = ({ profile }) => {
             Let’s build it.
           </h2>
           <p className="mt-3 text-base text-[#7A6B58] dark:text-[#B9A98C] leading-relaxed">
-            Send a focused note about an internship, freelance project, collaboration, or product idea.
+            Reach me directly by email, or through any of the profiles below.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        <div className="max-w-3xl mx-auto">
           
-          {/* Left Column: Direct Info & Social Profile Cards */}
-          <div className="lg:col-span-5 space-y-6">
+          {/* Direct Info & Social Profile Cards */}
+          <div className="space-y-6">
             
             {/* Direct Email Card */}
             <div className="rounded-2xl bg-white dark:bg-[#3A2F26] p-6 sm:p-7 border border-[#E4DBCB] dark:border-[#4A3C31] shadow-xs">
@@ -193,168 +137,6 @@ export const Contact: React.FC<ContactProps> = ({ profile }) => {
               </div>
             </div>
 
-          </div>
-
-          {/* Right Column: Interactive Contact Form */}
-          <div className="lg:col-span-7">
-            <div className="rounded-2xl bg-white dark:bg-[#3A2F26] p-6 sm:p-8 border border-[#E4DBCB] dark:border-[#4A3C31] shadow-xs">
-              
-              {submittedSuccess ? (
-                <div className="py-12 text-center space-y-4 animate-in fade-in zoom-in-95 duration-200">
-                  <div className="w-16 h-16 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 mx-auto flex items-center justify-center border border-emerald-200 dark:border-emerald-800">
-                    <Check className="w-8 h-8" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-[#3A2F26] dark:text-white">
-                    Email Draft Ready
-                  </h3>
-                  <p className="text-sm text-[#7A6B58] dark:text-[#B9A98C] max-w-md mx-auto">
-                    Your email app should now have a prepared message to Noah about "{formData.subject}". Send it there and he can reply to {formData.email}.
-                  </p>
-                  <div className="pt-4">
-                    <button
-                      id="contact-send-another-btn"
-                      onClick={handleResetForm}
-                      className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#B9861F] hover:bg-[#A2731A] transition-colors"
-                    >
-                      Send Another Message
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <form onSubmit={handleSubmit} className="space-y-5">
-                  <div className="flex items-center gap-2.5 pb-4 border-b border-[#EFE6D5] dark:border-[#4A3C31]">
-                    <MessageSquare className="w-5 h-5 text-[#B9861F] dark:text-[#D9A62E]" />
-                    <h3 className="text-base sm:text-lg font-bold text-[#3A2F26] dark:text-white">
-                      Send a Message
-                    </h3>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {/* Name */}
-                    <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-[#7A6B58] dark:text-[#D3C6AF] mb-1.5">
-                        Your Name <span className="text-[#A8432F]">*</span>
-                      </label>
-                      <input
-                        id="contact-form-name"
-                        type="text"
-                        placeholder="Jane Doe"
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        className={`w-full px-3.5 py-2.5 text-sm rounded-xl bg-[#F7F2E9] dark:bg-[#4A3C31]/80 border ${
-                          formErrors.name
-                            ? 'border-[#C1613F] dark:border-[#8F3623]'
-                            : 'border-[#E4DBCB] dark:border-[#5C4B3A]'
-                        } text-[#3A2F26] dark:text-white placeholder:text-[#B9A98C] focus:outline-none focus:ring-2 focus:ring-[#CC9A24]`}
-                      />
-                      {formErrors.name && (
-                        <p className="mt-1 text-xs text-[#A8432F] flex items-center gap-1">
-                          <AlertCircle className="w-3 h-3" />
-                          <span>{formErrors.name}</span>
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Email */}
-                    <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-[#7A6B58] dark:text-[#D3C6AF] mb-1.5">
-                        Your Email <span className="text-[#A8432F]">*</span>
-                      </label>
-                      <input
-                        id="contact-form-email"
-                        type="email"
-                        placeholder="jane@company.com"
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        className={`w-full px-3.5 py-2.5 text-sm rounded-xl bg-[#F7F2E9] dark:bg-[#4A3C31]/80 border ${
-                          formErrors.email
-                            ? 'border-[#C1613F] dark:border-[#8F3623]'
-                            : 'border-[#E4DBCB] dark:border-[#5C4B3A]'
-                        } text-[#3A2F26] dark:text-white placeholder:text-[#B9A98C] focus:outline-none focus:ring-2 focus:ring-[#CC9A24]`}
-                      />
-                      {formErrors.email && (
-                        <p className="mt-1 text-xs text-[#A8432F] flex items-center gap-1">
-                          <AlertCircle className="w-3 h-3" />
-                          <span>{formErrors.email}</span>
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Subject Selector */}
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-[#7A6B58] dark:text-[#D3C6AF] mb-1.5">
-                      Subject / Topic
-                    </label>
-                    <select
-                      id="contact-form-subject"
-                      value={formData.subject}
-                      onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                      className="w-full px-3.5 py-2.5 text-sm rounded-xl bg-[#F7F2E9] dark:bg-[#4A3C31]/80 border border-[#E4DBCB] dark:border-[#5C4B3A] text-[#3A2F26] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#CC9A24]"
-                    >
-                      <option value="Project Inquiry">Freelance or product build</option>
-                      <option value="Internship Opportunity">Internship opportunity</option>
-                      <option value="Collaboration">Collaboration</option>
-                      <option value="Code Review">Code review or backend help</option>
-                      <option value="General Question">General Hello / Quick Question</option>
-                    </select>
-                  </div>
-
-                  {/* Message */}
-                  <div>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <label className="block text-xs font-bold uppercase tracking-wider text-[#7A6B58] dark:text-[#D3C6AF]">
-                        Message Details <span className="text-[#A8432F]">*</span>
-                      </label>
-                      <span className="text-[11px] font-mono text-[#B9A98C]">
-                        {formData.message.length} chars
-                      </span>
-                    </div>
-                    <textarea
-                      id="contact-form-message"
-                      rows={5}
-                      placeholder="Tell me about your project, timeline, architecture requirements, or role details..."
-                      value={formData.message}
-                      onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                      className={`w-full px-3.5 py-2.5 text-sm rounded-xl bg-[#F7F2E9] dark:bg-[#4A3C31]/80 border ${
-                        formErrors.message
-                          ? 'border-[#C1613F] dark:border-[#8F3623]'
-                          : 'border-[#E4DBCB] dark:border-[#5C4B3A]'
-                      } text-[#3A2F26] dark:text-white placeholder:text-[#B9A98C] focus:outline-none focus:ring-2 focus:ring-[#CC9A24]`}
-                    />
-                    {formErrors.message && (
-                      <p className="mt-1 text-xs text-[#A8432F] flex items-center gap-1">
-                        <AlertCircle className="w-3 h-3" />
-                        <span>{formErrors.message}</span>
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Submit Button */}
-                  <div className="pt-2">
-                    <button
-                      id="contact-form-submit-btn"
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3 rounded-xl font-semibold text-sm text-white bg-[#B9861F] hover:bg-[#A2731A] active:bg-[#8A6015] disabled:opacity-50 transition-all shadow-xs hover:shadow-md"
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                          <span>Sending Message...</span>
-                        </>
-                      ) : (
-                        <>
-                          <Send className="w-4 h-4" />
-                          <span>Send Message</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </form>
-              )}
-
-            </div>
           </div>
 
         </div>

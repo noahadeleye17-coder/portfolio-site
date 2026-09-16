@@ -1,96 +1,29 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ArrowUpRight, ExternalLink, FolderGit2, Github, Info, Star } from 'lucide-react';
 import { Project } from '../types';
 import { ProjectModal } from './ProjectModal';
-import { TechLogo } from './TechLogo';
 
 interface ProjectsProps {
   projects: Project[];
 }
 
-interface GitHubRepository {
-  id: number;
-  name: string;
-  description: string | null;
-  html_url: string;
-  homepage: string | null;
-  language: string | null;
-  stargazers_count: number;
-  fork: boolean;
-  archived: boolean;
-  pushed_at: string | null;
-  updated_at: string;
-}
-
 const GITHUB_USERNAME = 'noahadeleye17-coder';
-const MAX_GITHUB_PROJECTS = 6;
 
-const languageIconSlugs: Record<string, string> = {
-  JavaScript: 'javascript',
-  TypeScript: 'typescript',
-  HTML: 'html5',
-  CSS: 'css3',
-  'C++': 'cplusplus',
-  Dockerfile: 'docker',
-  Java: 'java',
-  Python: 'python',
-};
-
-const repositoryNameFromUrl = (url: string) => url.split('/').filter(Boolean).pop()?.toLowerCase();
-
-const readableRepositoryName = (name: string) => name.replace(/[-_]+/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
-
-const updatedLabel = (date: string | null) => {
-  if (!date) return 'Recently updated';
-  return `Updated ${new Intl.DateTimeFormat('en', { month: 'short', year: 'numeric' }).format(new Date(date))}`;
-};
+// The two builds shown under "More on GitHub", in this order.
+const SECONDARY_PROJECT_IDS = ['vendor-storefront', 'codealpha-job-board'];
 
 export const Projects: React.FC<ProjectsProps> = ({ projects }) => {
   const [activeModalProject, setActiveModalProject] = useState<Project | null>(null);
-  const [githubRepositories, setGithubRepositories] = useState<GitHubRepository[]>([]);
 
   const featuredProjects = useMemo(() => projects.filter((project) => project.featured), [projects]);
 
-  useEffect(() => {
-    const controller = new AbortController();
-    const featuredRepositoryNames = new Set(
-      featuredProjects
-        .map((project) => repositoryNameFromUrl(project.githubUrl))
-        .filter((name): name is string => Boolean(name))
-    );
-
-    const loadRepositories = async () => {
-      try {
-        const response = await fetch(
-          `https://api.github.com/users/${GITHUB_USERNAME}/repos?type=owner&sort=updated&direction=desc&per_page=100`,
-          {
-            headers: { Accept: 'application/vnd.github+json' },
-            cache: 'no-store',
-            signal: controller.signal,
-          }
-        );
-
-        if (!response.ok) throw new Error(`GitHub returned ${response.status}`);
-
-        const repositories: GitHubRepository[] = await response.json();
-        setGithubRepositories(
-          repositories
-            .filter((repository) =>
-              !repository.fork &&
-              !repository.archived &&
-              repository.name.toLowerCase() !== 'portfolio-site' &&
-              !featuredRepositoryNames.has(repository.name.toLowerCase())
-            )
-            .slice(0, MAX_GITHUB_PROJECTS)
-        );
-      } catch (error) {
-        if ((error as DOMException).name !== 'AbortError') setGithubRepositories([]);
-      }
-    };
-
-    loadRepositories();
-    return () => controller.abort();
-  }, [featuredProjects]);
+  const secondaryProjects = useMemo(
+    () =>
+      SECONDARY_PROJECT_IDS.map((id) => projects.find((project) => project.id === id)).filter(
+        (project): project is Project => Boolean(project)
+      ),
+    [projects]
+  );
 
   return (
     <section id="projects" className="relative py-20 sm:py-28">
@@ -136,38 +69,56 @@ export const Projects: React.FC<ProjectsProps> = ({ projects }) => {
           ))}
         </div>
 
-        {githubRepositories.length > 0 && (
+        {secondaryProjects.length > 0 && (
           <div className="mt-14 border-t border-[#E4DBCB] pt-10 dark:border-[#4A3C31] sm:mt-20 sm:pt-12">
             <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
               <div>
-                <p className="font-mono text-xs font-semibold uppercase tracking-[0.16em] text-[#B9861F] dark:text-[#D9A62E]">Live from GitHub</p>
-                <h3 className="mt-1 text-2xl font-extrabold tracking-tight text-[#3A2F26] dark:text-white">More from GitHub.</h3>
+                <p className="font-mono text-xs font-semibold uppercase tracking-[0.16em] text-[#B9861F] dark:text-[#D9A62E]">Also in the workshop</p>
+                <h3 className="mt-1 text-2xl font-extrabold tracking-tight text-[#3A2F26] dark:text-white">More on GitHub.</h3>
               </div>
               <a href={`https://github.com/${GITHUB_USERNAME}`} target="_blank" rel="noreferrer noopener" className="inline-flex items-center gap-1 text-sm font-semibold text-[#7A6B58] transition-colors hover:text-[#B9861F] dark:text-[#D3C6AF] dark:hover:text-[#D9A62E]">All repositories <ArrowUpRight className="h-4 w-4" /></a>
             </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {githubRepositories.map((repository) => (
-                <article key={repository.id} className="group flex min-h-52 flex-col rounded-2xl border border-[#E4DBCB] bg-white p-5 transition-all hover:-translate-y-1 hover:border-[#D3C6AF] hover:shadow-md dark:border-[#4A3C31] dark:bg-[#3A2F26] dark:hover:border-[#5C4B3A]">
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {secondaryProjects.map((project) => (
+                <article key={project.id} className="group flex flex-col rounded-2xl border border-[#E4DBCB] bg-white p-5 transition-all hover:-translate-y-1 hover:border-[#D3C6AF] hover:shadow-md dark:border-[#4A3C31] dark:bg-[#3A2F26] dark:hover:border-[#5C4B3A] sm:p-6">
                   <div className="flex items-start justify-between gap-4">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#F7F2E9] dark:bg-[#4A3C31]">
-                      <TechLogo name={repository.language || 'GitHub'} iconSlug={repository.language ? languageIconSlugs[repository.language] : 'github'} size={34} className="h-8 w-8" />
+                    <div>
+                      <h4 className="text-lg font-bold text-[#3A2F26] dark:text-white">{project.title}</h4>
+                      <p className="mt-1 text-sm text-[#7A6B58] dark:text-[#B9A98C]">{project.subtitle}</p>
                     </div>
-                    <a href={repository.html_url} target="_blank" rel="noreferrer noopener" aria-label={`Open ${repository.name} on GitHub`} className="project-action"><Github className="h-4 w-4" /></a>
+                    {project.githubUrl && (
+                      <a href={project.githubUrl} target="_blank" rel="noreferrer noopener" aria-label={`Open ${project.title} on GitHub`} className="project-action shrink-0"><Github className="h-4 w-4" /></a>
+                    )}
                   </div>
-                  <div className="mt-5">
-                    <h4 className="font-bold text-[#3A2F26] dark:text-white">{readableRepositoryName(repository.name)}</h4>
-                    <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-[#7A6B58] dark:text-[#B9A98C]">{repository.description || 'A work in progress on GitHub.'}</p>
+
+                  <div className="mt-4 flex flex-wrap gap-1.5">
+                    {project.tags.slice(0, 4).map((tag) => <span key={tag} className="rounded-md border border-[#E4DBCB]/60 bg-[#EFE6D5] px-2 py-0.5 font-mono text-xs text-[#7A6B58] dark:border-[#5C4B3A]/60 dark:bg-[#4A3C31] dark:text-[#D3C6AF]">{tag}</span>)}
                   </div>
-                  <div className="mt-auto flex items-center justify-between gap-3 pt-5 font-mono text-xs text-[#9C8A6E] dark:text-[#B9A98C]">
-                    <span>{repository.language || 'Code'}</span>
-                    <span className="inline-flex items-center gap-1"><Star className="h-3.5 w-3.5" />{repository.stargazers_count}</span>
-                  </div>
-                  <div className="mt-2 flex items-center justify-between gap-3 font-mono text-xs text-[#B9A98C]">
-                    <span>{updatedLabel(repository.pushed_at || repository.updated_at)}</span>
-                    {repository.homepage && <a href={repository.homepage} target="_blank" rel="noreferrer noopener" className="inline-flex items-center gap-1 font-semibold text-[#B9861F] hover:text-[#8A6015] dark:text-[#D9A62E]"><ExternalLink className="h-3.5 w-3.5" />Live</a>}
+
+                  <div className="mt-auto flex items-center justify-between gap-3 border-t border-[#EFE6D5] pt-4 dark:border-[#4A3C31] sm:mt-6">
+                    <button type="button" onClick={() => setActiveModalProject(project)} className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#B9861F] transition-colors hover:text-[#8A6015] dark:text-[#D9A62E]">
+                      Details <Info className="h-4 w-4" />
+                    </button>
+                    {project.liveUrl && (
+                      <a href={project.liveUrl} target="_blank" rel="noreferrer noopener" aria-label={`Open ${project.title}`} className="project-action text-[#B9861F] dark:text-[#D9A62E]"><ExternalLink className="h-4 w-4" /></a>
+                    )}
                   </div>
                 </article>
               ))}
+            </div>
+
+            <div className="mt-8 flex justify-center">
+              <a
+                href={`https://github.com/${GITHUB_USERNAME}`}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="inline-flex items-center gap-2 rounded-xl border border-[#E4DBCB] bg-white px-5 py-3 text-sm font-semibold text-[#5C4B3A] shadow-xs transition-all hover:-translate-y-0.5 hover:border-[#D9A62E] hover:text-[#B9861F] dark:border-[#4A3C31] dark:bg-[#3A2F26] dark:text-[#E4DBCB] dark:hover:border-[#B9861F] dark:hover:text-[#D9A62E]"
+              >
+                <Github className="h-4 w-4" />
+                See more on GitHub
+                <ArrowUpRight className="h-4 w-4" />
+              </a>
             </div>
           </div>
         )}

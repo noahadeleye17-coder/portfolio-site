@@ -72,6 +72,19 @@ export const defaultPortfolioData: ProfileData = {
         { name: 'GitHub', iconSlug: 'github', level: 82, experience: 'Active use', highlighted: true },
         { name: 'GitHub Actions', iconSlug: 'githubactions', level: 65, experience: 'Active use' }
       ]
+    },
+    {
+      title: 'Languages & Platforms',
+      description: 'Languages and platforms I build in beyond the web stack.',
+      iconName: 'Code2',
+      skills: [
+        { name: 'Python', iconSlug: 'python', level: 72, experience: 'Active use' },
+        { name: 'C', iconSlug: 'c', level: 62, experience: 'Fundamentals' },
+        { name: 'Go', iconSlug: 'go', level: 55, experience: 'Learning' },
+        { name: 'Rust', iconSlug: 'rust', level: 45, experience: 'Learning' },
+        { name: 'Flutter', iconSlug: 'flutter', level: 50, experience: 'Learning' },
+        { name: 'Dart', iconSlug: 'dart', level: 50, experience: 'Learning' }
+      ]
     }
   ],
   projects: [

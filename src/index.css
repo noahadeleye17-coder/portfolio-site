@@ -48,7 +48,11 @@
   .stack-tile {
     animation: stack-tile-in 550ms cubic-bezier(0.16, 1, 0.3, 1) both;
   }
+}
 
+/* Component classes live in the components layer so Tailwind utilities
+   (e.g. lg:hidden on the mobile menu button) can always override them. */
+@layer components {
   .icon-control {
     display: inline-flex;
     align-items: center;

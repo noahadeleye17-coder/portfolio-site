@@ -79,7 +79,7 @@ export const Hero: React.FC<HeroProps> = ({
   };
 
   return (
-    <section id="hero" className="relative pt-28 sm:pt-36 pb-16 sm:pb-24 overflow-hidden bg-grid-pattern">
+    <section id="hero" className="relative pt-24 sm:pt-28 lg:pt-20 pb-16 sm:pb-20 lg:pb-16 overflow-hidden bg-grid-pattern">
       <div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-emerald-500 via-[#CC9A24] to-sky-500" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16">
@@ -298,9 +298,11 @@ export const Hero: React.FC<HeroProps> = ({
                     <div className="space-y-1">
                       <p className="text-[#9C8A6E]">// Core technical stack</p>
                       <p><span className="text-purple-400">const</span> <span className="text-sky-300">coreStack</span> = {'{'}</p>
+                      <p className="pl-4">languages: <span className="text-emerald-300">['JavaScript', 'TypeScript', 'Python', 'Go', 'Rust', 'C']</span>,</p>
                       <p className="pl-4">frontend: <span className="text-emerald-300">['React', 'Next.js', 'Vanilla JS', 'Tailwind']</span>,</p>
                       <p className="pl-4">backend: <span className="text-emerald-300">['Node.js', 'Express', 'MongoDB', 'Mongoose']</span>,</p>
                       <p className="pl-4">auth_media: <span className="text-emerald-300">['JWT', 'Google OAuth', 'Cloudinary']</span>,</p>
+                      <p className="pl-4">mobile: <span className="text-emerald-300">['Flutter', 'Dart']</span>,</p>
                       <p className="pl-4">deploy: <span className="text-emerald-300">['Render', 'Vercel', 'MongoDB Atlas']</span>,</p>
                       <p>{'}'};</p>
                     </div>
