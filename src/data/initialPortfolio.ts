@@ -1,17 +1,20 @@
 import { ProfileData } from '../types';
+import offCampusHubImage from '../Assets/offcampushub.ng_(iPhone 16 Pro Max).png';
+import commitmentIssuesImage from '../Assets/commitment-issues-alpha.vercel.app_(iPhone 16 Pro Max).png';
+import vendorStorefrontImage from '../Assets/vendor-storefront-roan.vercel.app_(iPhone 16 Pro Max).png';
 
 export const defaultPortfolioData: ProfileData = {
   name: 'Noah Adeleye',
-  title: 'Full-Stack Developer',
-  headline: 'Building practical, real-world web platforms — from a student housing marketplace to WhatsApp-native storefronts — while studying Computer Information Systems at FUTA.',
+  title: 'Full-Stack Developer & Product Builder',
+  headline: 'I build practical web products for Nigerian users: housing tools for FUTA students, WhatsApp-first storefronts for vendors, and playful developer utilities that still respect the stack.',
   email: 'noahadeleye17@gmail.com',
   location: 'Akure, Nigeria',
   availability: 'Open to internships, freelance work, and collaborations',
-  avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800',
+  avatarUrl: 'https://github.com/noahadeleye17-coder.png',
   bioParagraphs: [
     "Hi, I'm Noah — a full-stack developer and Computer Information Systems student at the Federal University of Technology, Akure (FUTA).",
     "I like building things that solve problems people around me actually have. Off-Campus Hub started because finding off-campus housing and roommates near FUTA was a mess of WhatsApp groups and word of mouth, so I built a real listings and roommate-matching platform for it, end to end — backend, frontend, deployment, the works.",
-    "Alongside that I'm working on a WhatsApp-order storefront builder for Nigerian vendors, completing a backend development internship with CodeAlpha, and shipping smaller solo projects for fun. I work mainly in Node.js/Express and MongoDB on the backend, with React/Next.js or vanilla JS on the frontend depending on the project."
+    "Alongside that I'm working on a WhatsApp-order storefront builder for Nigerian vendors, completing a backend development internship with CodeAlpha, and shipping smaller solo projects for fun. I work mainly in Node.js/Express and MongoDB on the backend, with React/Next.js or focused vanilla JS on the frontend depending on what the product actually needs."
   ],
   stats: {
     yearsExperience: 2,
@@ -89,8 +92,9 @@ export const defaultPortfolioData: ProfileData = {
       description: 'A full-stack listings directory connecting FUTA students with off-campus housing and compatible roommates — built and shipped solo, live in production.',
       fullDescription: 'Off-Campus Hub replaces the scattered WhatsApp groups and word-of-mouth students relied on to find off-campus housing near FUTA. Students can browse verified listings with photos and video, filter by gate/location and price, and find roommates through a compatibility-based matching system with a mutual-connect privacy flow. Landlords get their own dashboard to manage listings, and admins get a full control panel to manage users, listings, and site content.',
       category: 'Full Stack',
-      image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=1200',
+      image: offCampusHubImage,
       tags: ['Node.js', 'Express', 'MongoDB', 'Mongoose', 'JWT', 'Google OAuth', 'Cloudinary', 'Leaflet', 'Vanilla JS'],
+      metrics: 'Live production platform for FUTA housing discovery',
       githubUrl: 'https://github.com/noahadeleye17-coder/campus-housing',
       liveUrl: 'https://offcampushub.ng',
       featured: true,
@@ -110,8 +114,9 @@ export const defaultPortfolioData: ProfileData = {
       description: 'A fun web app that turns your git commit history into a shareable personality readout — streaks, peak coding hours, messiest day, and a personality archetype.',
       fullDescription: 'Connect your GitHub account (or paste a git log) and Commitment Issues analyzes your commit history to generate a shareable personality readout: your commit streaks, peak coding hours, your messiest commit day, and an overall developer archetype, complete with a dynamic social share image.',
       category: 'Mobile & Web',
-      image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=1200',
+      image: commitmentIssuesImage,
       tags: ['Next.js', 'TypeScript', 'GitHub OAuth', 'Vercel'],
+      metrics: 'Turns real commit history into a shareable developer profile',
       githubUrl: 'https://github.com/noahadeleye17-coder/Commitment-issues',
       liveUrl: 'https://commitment-issues-alpha.vercel.app',
       featured: true,
@@ -129,7 +134,7 @@ export const defaultPortfolioData: ProfileData = {
       description: 'A backend-focused job board platform built as part of a CodeAlpha Backend Development internship task.',
       fullDescription: 'Built as one of the required tasks for a CodeAlpha Backend Development internship: a job board platform with the same backend stack used across my other projects, covering the core flows a job board needs end to end.',
       category: 'Full Stack',
-      image: 'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&q=80&w=1200',
+      image: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&q=80&w=1200',
       tags: ['Node.js', 'Express', 'MongoDB', 'Mongoose'],
       githubUrl: '',
       liveUrl: '',
@@ -147,8 +152,9 @@ export const defaultPortfolioData: ProfileData = {
       description: 'A multi-tenant platform where Nigerian vendors can build their own customizable storefront and take orders straight through WhatsApp — currently in development.',
       fullDescription: 'Vendors sign up, build a customizable storefront (products, colors, fonts, layout), and get a shareable personal link. Orders route through a pre-filled WhatsApp message rather than an in-app checkout, so vendors keep direct control of their buyer relationships and pricing — deliberately staying out of payment, unlike most competitors in this space.',
       category: 'Full Stack',
-      image: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&q=80&w=1200',
+      image: vendorStorefrontImage,
       tags: ['Supabase', 'WhatsApp API', 'Mobile-first'],
+      metrics: 'MVP in development for WhatsApp-native selling',
       githubUrl: '',
       liveUrl: '',
       featured: false,

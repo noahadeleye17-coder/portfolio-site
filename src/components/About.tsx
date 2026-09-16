@@ -50,14 +50,11 @@ export const About: React.FC<AboutProps> = ({ profile, onOpenResume }) => {
         <div className="max-w-3xl mx-auto text-center mb-16">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-[#F6E9C4] dark:bg-[#3D2F12]/50 border border-[#E8C765] dark:border-[#8A6015]/50 text-[#B9861F] dark:text-[#D9A62E] text-xs font-semibold uppercase tracking-wider mb-3">
             <User className="w-3.5 h-3.5" />
-            <span>Biography & Background</span>
+            <span>About</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#3A2F26] dark:text-white tracking-tight">
-            About Me & Engineering Journey
+            A builder, briefly.
           </h2>
-          <p className="mt-3 text-base text-[#7A6B58] dark:text-[#B9A98C] leading-relaxed">
-            A comprehensive look at my professional background, technical principles, and what drives my work.
-          </p>
         </div>
 
         {/* 2-Column Content Layout */}
@@ -68,10 +65,10 @@ export const About: React.FC<AboutProps> = ({ profile, onOpenResume }) => {
             <div className="rounded-2xl bg-white dark:bg-[#3A2F26] p-6 sm:p-8 border border-[#E4DBCB] dark:border-[#4A3C31] shadow-xs space-y-5">
               <div className="flex items-center gap-2.5 text-sm font-semibold text-[#3A2F26] dark:text-white pb-3 border-b border-[#EFE6D5] dark:border-[#4A3C31]">
                 <Terminal className="w-4 h-4 text-[#B9861F] dark:text-[#D9A62E]" />
-                <span>My Story & Professional Focus</span>
+                <span>Current Focus</span>
               </div>
 
-              {profile.bioParagraphs.map((paragraph, index) => (
+              {profile.bioParagraphs.slice(0, 1).map((paragraph, index) => (
                 <p key={index} className="text-[#7A6B58] dark:text-[#D3C6AF] text-base leading-relaxed">
                   {paragraph}
                 </p>
@@ -80,7 +77,7 @@ export const About: React.FC<AboutProps> = ({ profile, onOpenResume }) => {
               <div className="pt-4 border-t border-[#EFE6D5] dark:border-[#4A3C31] flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center gap-2 text-xs font-medium text-[#9C8A6E] dark:text-[#B9A98C]">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                  <span>Open to high-impact technical challenges</span>
+                  <span>Open to useful work</span>
                 </div>
                 <button
                   id="about-resume-cta-btn"
@@ -88,7 +85,7 @@ export const About: React.FC<AboutProps> = ({ profile, onOpenResume }) => {
                   className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-[#B9861F] dark:text-[#D9A62E] hover:text-[#A2731A] dark:hover:text-[#DFB94A] transition-colors group"
                 >
                   <FileText className="w-4 h-4" />
-                  <span>Download Full Resume PDF</span>
+                  <span>Full CV</span>
                   <span className="group-hover:translate-x-0.5 transition-transform">→</span>
                 </button>
               </div>
@@ -106,7 +103,7 @@ export const About: React.FC<AboutProps> = ({ profile, onOpenResume }) => {
               </div>
               <div className="p-4 rounded-xl bg-white dark:bg-[#3A2F26] border border-[#E4DBCB] dark:border-[#4A3C31] col-span-2 sm:col-span-1">
                 <span className="text-xs text-[#B9A98C] dark:text-[#9C8A6E] uppercase tracking-wider font-semibold block">Focus Areas</span>
-                <span className="text-sm font-bold text-[#4A3C31] dark:text-[#E4DBCB] mt-1 block">Full-Stack & Cloud</span>
+                <span className="text-sm font-bold text-[#4A3C31] dark:text-[#E4DBCB] mt-1 block">Full-stack products for real users</span>
               </div>
             </div>
           </div>
@@ -115,7 +112,7 @@ export const About: React.FC<AboutProps> = ({ profile, onOpenResume }) => {
           <div className="lg:col-span-5 space-y-4">
             <h3 className="text-lg font-bold text-[#3A2F26] dark:text-white flex items-center gap-2">
               <Compass className="w-4 h-4 text-[#CC9A24]" />
-              <span>Core Engineering Principles</span>
+              <span>What matters</span>
             </h3>
 
             <div className="space-y-3">
@@ -132,9 +129,6 @@ export const About: React.FC<AboutProps> = ({ profile, onOpenResume }) => {
                       <h4 className="text-sm font-bold text-[#3A2F26] dark:text-white mb-1">
                         {val.title}
                       </h4>
-                      <p className="text-xs sm:text-sm text-[#7A6B58] dark:text-[#B9A98C] leading-relaxed">
-                        {val.description}
-                      </p>
                     </div>
                   </div>
                 </div>

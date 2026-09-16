@@ -31,7 +31,7 @@ export const Experience: React.FC<ExperienceProps> = ({ experiences, education }
             Experience & Education
           </h2>
           <p className="mt-3 text-base text-[#7A6B58] dark:text-[#B9A98C] leading-relaxed">
-            My professional background leading engineering initiatives, delivering enterprise products, and academic credentials.
+            Work so far.
           </p>
         </div>
 
@@ -159,10 +159,10 @@ export const Experience: React.FC<ExperienceProps> = ({ experiences, education }
                   </div>
                   <div>
                     <h4 className="text-sm font-bold text-[#3A2F26] dark:text-white">
-                      Verified Code Quality & Standards
+                      Current Direction
                     </h4>
                     <p className="text-xs text-[#7A6B58] dark:text-[#D3C6AF] mt-1 leading-relaxed">
-                      All projects follow strict semantic versioning, automated continuous integration tests, and production security benchmarks.
+                      Building deeper backend fundamentals while turning local product ideas into usable web platforms.
                     </p>
                   </div>
                 </div>

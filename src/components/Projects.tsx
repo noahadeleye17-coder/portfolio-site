@@ -59,10 +59,10 @@ export const Projects: React.FC<ProjectsProps> = ({ projects }) => {
             <span>Featured Engineering Work</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#3A2F26] dark:text-white tracking-tight">
-            Projects Showcase
+            Selected work.
           </h2>
           <p className="mt-3 text-base text-[#7A6B58] dark:text-[#B9A98C] leading-relaxed">
-            A curated selection of production applications, distributed backend services, and AI architectures I have built.
+            A focused set of apps I have shipped or am actively building, with the decisions, tradeoffs, and product context kept visible.
           </p>
         </div>
 
@@ -148,11 +148,13 @@ export const Projects: React.FC<ProjectsProps> = ({ projects }) => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            {filteredProjects.map((project) => (
+            {filteredProjects.map((project, index) => (
               <div
                 key={project.id}
                 id={`project-card-${project.id}`}
-                className="group rounded-2xl bg-white dark:bg-[#3A2F26] border border-[#E4DBCB] dark:border-[#4A3C31] overflow-hidden shadow-xs hover:shadow-lg hover:border-[#D3C6AF] dark:hover:border-[#5C4B3A] transition-all flex flex-col justify-between"
+                className={`group reveal-card rounded-2xl bg-white dark:bg-[#3A2F26] border border-[#E4DBCB] dark:border-[#4A3C31] overflow-hidden shadow-xs hover:shadow-lg hover:-translate-y-1 hover:border-[#D3C6AF] dark:hover:border-[#5C4B3A] transition-all flex flex-col justify-between ${
+                  project.featured && index === 0 ? 'md:col-span-2' : ''
+                }`}
               >
                 <div>
                   {/* Thumbnail / Image with Overlay */}
@@ -160,7 +162,7 @@ export const Projects: React.FC<ProjectsProps> = ({ projects }) => {
                     <img
                       src={project.image}
                       alt={project.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
                       referrerPolicy="no-referrer"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#2A211C]/80 via-transparent to-transparent" />

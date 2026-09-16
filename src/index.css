@@ -30,6 +30,118 @@
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
   }
+
+  .reveal-card {
+    animation: reveal-up 700ms ease both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 28%;
+  }
+
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
+  .stack-tile {
+    animation: stack-tile-in 550ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .icon-control {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: center;
+    border: 1px solid #E4DBCB;
+    border-radius: 0.75rem;
+    background: rgba(239, 230, 213, 0.9);
+    color: #5C4B3A;
+    padding: 0.5rem;
+    transition: background-color 150ms ease, color 150ms ease, transform 150ms ease;
+  }
+
+  .icon-control:hover {
+    background: #E4DBCB;
+    color: #B9861F;
+    transform: translateY(-1px);
+  }
+
+  .dark .icon-control {
+    border-color: #4A3C31;
+    background: rgba(58, 47, 38, 0.9);
+    color: #D3C6AF;
+  }
+
+  .dark .icon-control:hover {
+    background: #4A3C31;
+    color: #D9A62E;
+  }
+
+  .menu-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid #E4DBCB;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.86);
+    color: #5C4B3A;
+    box-shadow: 0 4px 12px rgba(58, 47, 38, 0.08);
+    transition: transform 180ms ease, background-color 180ms ease;
+  }
+
+  .menu-trigger:hover { transform: scale(1.06); background: #F6E9C4; }
+  .dark .menu-trigger { border-color: #4A3C31; background: #3A2F26; color: #E4DBCB; }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: rgba(204, 154, 36, 0.25);
+}
+
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes stack-tile-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.94);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* Smooth custom scrollbars */

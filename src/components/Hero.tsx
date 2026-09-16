@@ -80,10 +80,7 @@ export const Hero: React.FC<HeroProps> = ({
 
   return (
     <section id="hero" className="relative pt-28 sm:pt-36 pb-16 sm:pb-24 overflow-hidden bg-grid-pattern">
-      {/* Ambient background glows */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-150 h-80 bg-[#CC9A24]/10 dark:bg-[#CC9A24]/15 blur-[120px] rounded-full pointer-events-none -z-10" />
-      <div className="absolute top-1/3 right-10 w-87.5 h-87.5 bg-sky-500/10 dark:bg-sky-500/10 blur-[100px] rounded-full pointer-events-none -z-10" />
-
+      <div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-emerald-500 via-[#CC9A24] to-sky-500" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16">
           
@@ -109,20 +106,15 @@ export const Hero: React.FC<HeroProps> = ({
 
             {/* Main Heading */}
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-[#3A2F26] dark:text-white tracking-tight leading-[1.12] mb-4">
-              Building scalable systems with{' '}
+              Building useful products from{' '}
               <span className="text-transparent bg-clip-text bg-linear-to-r from-[#B9861F] via-[#CC9A24] to-sky-500 dark:from-[#D9A62E] dark:via-[#DFB94A] dark:to-sky-400">
-                precision & speed.
+                local problems.
               </span>
             </h1>
 
             {/* Professional Subheading */}
             <p className="text-lg sm:text-xl font-medium text-[#5C4B3A] dark:text-[#E4DBCB] mb-4 tracking-tight">
               {profile.name} — <span className="text-[#B9861F] dark:text-[#D9A62E] font-semibold">{profile.title}</span>
-            </p>
-
-            {/* Headline / Summary */}
-            <p className="text-base sm:text-lg text-[#7A6B58] dark:text-[#D3C6AF] max-w-2xl mx-auto lg:mx-0 mb-8 leading-relaxed">
-              {profile.headline}
             </p>
 
             {/* Location, Local Time & Copy Email */}
@@ -137,7 +129,7 @@ export const Hero: React.FC<HeroProps> = ({
                   <span className="text-[#D3C6AF] dark:text-[#5C4B3A]">•</span>
                   <div className="inline-flex items-center gap-1.5 font-mono text-xs text-[#9C8A6E] dark:text-[#B9A98C]">
                     <Clock className="w-3.5 h-3.5 text-sky-500" />
-                    <span>{currentTime} GMT</span>
+                    <span>{currentTime} WAT</span>
                   </div>
                 </>
               )}
@@ -334,6 +326,41 @@ export const Hero: React.FC<HeroProps> = ({
                       <p className="text-[#D3C6AF]">- Learn new tools by building with them, not in isolation</p>
                     </div>
                   )}
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between text-xs font-mono text-[#9C8A6E] dark:text-[#B9A98C]">
+                  <span>recent ship log</span>
+                  <span>{profile.projects.filter((project) => project.featured).length} featured</span>
+                </div>
+                <div className="space-y-2">
+                  {profile.projects.slice(0, 3).map((project) => (
+                    <a
+                      key={project.id}
+                      href="#projects"
+                      className="group flex items-center gap-3 rounded-2xl bg-[#F7F2E9] dark:bg-[#4A3C31]/50 border border-[#EFE6D5] dark:border-[#4A3C31] p-2.5 hover:border-[#CC9A24] transition-all"
+                    >
+                      <img
+                        src={project.image}
+                        alt=""
+                        className="h-14 w-12 rounded-xl object-cover object-top bg-[#2A211C]"
+                        referrerPolicy="no-referrer"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="truncate text-sm font-bold text-[#3A2F26] dark:text-white group-hover:text-[#B9861F] dark:group-hover:text-[#D9A62E]">
+                            {project.title}
+                          </span>
+                          {project.liveUrl && <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />}
+                        </div>
+                        <p className="truncate text-[11px] text-[#7A6B58] dark:text-[#B9A98C]">
+                          {project.subtitle}
+                        </p>
+                      </div>
+                      <ArrowRight className="h-4 w-4 text-[#B9A98C] group-hover:text-[#CC9A24] group-hover:translate-x-0.5 transition-all" />
+                    </a>
+                  ))}
                 </div>
               </div>
 

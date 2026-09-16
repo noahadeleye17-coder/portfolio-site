@@ -61,11 +61,13 @@ export const Contact: React.FC<ContactProps> = ({ profile }) => {
     if (!validateForm()) return;
 
     setIsSubmitting(true);
-    // Simulate real-time network request
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setSubmittedSuccess(true);
-    }, 1000);
+    const subject = encodeURIComponent(`${formData.subject} from ${formData.name}`);
+    const body = encodeURIComponent(
+      `${formData.message}\n\nFrom: ${formData.name}\nReply-to: ${formData.email}`
+    );
+    window.location.href = `mailto:${profile.email}?subject=${subject}&body=${body}`;
+    setIsSubmitting(false);
+    setSubmittedSuccess(true);
   };
 
   const handleResetForm = () => {
@@ -90,10 +92,10 @@ export const Contact: React.FC<ContactProps> = ({ profile }) => {
             <span>Get In Touch</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#3A2F26] dark:text-white tracking-tight">
-            Let's Build Something Great Together
+            Let’s build it.
           </h2>
           <p className="mt-3 text-base text-[#7A6B58] dark:text-[#B9A98C] leading-relaxed">
-            Whether you have a product to build, an architectural challenge to solve, or an engineering role to fill, I'd love to hear from you.
+            Send a focused note about an internship, freelance project, collaboration, or product idea.
           </p>
         </div>
 
@@ -186,7 +188,7 @@ export const Contact: React.FC<ContactProps> = ({ profile }) => {
                   Location & Timezone
                 </div>
                 <div className="text-[#9C8A6E] dark:text-[#B9A98C]">
-                  {profile.location} (GMT / BST)
+                  {profile.location} (WAT)
                 </div>
               </div>
             </div>
@@ -203,10 +205,10 @@ export const Contact: React.FC<ContactProps> = ({ profile }) => {
                     <Check className="w-8 h-8" />
                   </div>
                   <h3 className="text-2xl font-bold text-[#3A2F26] dark:text-white">
-                    Message Sent Successfully!
+                    Email Draft Ready
                   </h3>
                   <p className="text-sm text-[#7A6B58] dark:text-[#B9A98C] max-w-md mx-auto">
-                    Thank you for reaching out, {formData.name}. I have received your message regarding "{formData.subject}" and will respond to {formData.email} shortly.
+                    Your email app should now have a prepared message to Noah about "{formData.subject}". Send it there and he can reply to {formData.email}.
                   </p>
                   <div className="pt-4">
                     <button
@@ -290,10 +292,10 @@ export const Contact: React.FC<ContactProps> = ({ profile }) => {
                       onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                       className="w-full px-3.5 py-2.5 text-sm rounded-xl bg-[#F7F2E9] dark:bg-[#4A3C31]/80 border border-[#E4DBCB] dark:border-[#5C4B3A] text-[#3A2F26] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#CC9A24]"
                     >
-                      <option value="Project Inquiry">New Project / Consulting Inquiry</option>
-                      <option value="Full-Time Opportunity">Full-time Engineering Role</option>
-                      <option value="Architecture Review">Architecture / Technical Advisory</option>
-                      <option value="Speaking / Mentorship">Speaking, Mentorship & Collaboration</option>
+                      <option value="Project Inquiry">Freelance or product build</option>
+                      <option value="Internship Opportunity">Internship opportunity</option>
+                      <option value="Collaboration">Collaboration</option>
+                      <option value="Code Review">Code review or backend help</option>
                       <option value="General Question">General Hello / Quick Question</option>
                     </select>
                   </div>
