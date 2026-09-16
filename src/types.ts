@@ -9,6 +9,7 @@ export interface SocialLink {
 
 export interface SkillItem {
   name: string;
+  iconSlug?: string;
   level: number; // 0-100
   experience: string;
   highlighted?: boolean;

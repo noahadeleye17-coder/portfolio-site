@@ -236,7 +236,7 @@ export const Hero: React.FC<HeroProps> = ({
                       {profile.title}
                     </div>
                     <div className="text-[11px] text-[#B9A98C] font-mono mt-0.5">
-                      Akure, Nigeria • WAT
+                      Lagos, Nigeria • WAT
                     </div>
                   </div>
                 </div>

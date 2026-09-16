@@ -1,13 +1,30 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 interface TechLogoProps {
   name: string;
+  iconSlug?: string;
   className?: string;
   size?: number;
 }
 
-export const TechLogo: React.FC<TechLogoProps> = ({ name, className = 'w-6 h-6', size = 24 }) => {
+export const TechLogo: React.FC<TechLogoProps> = ({ name, iconSlug, className = 'w-6 h-6', size = 24 }) => {
+  const [remoteIconFailed, setRemoteIconFailed] = useState(false);
   const normName = name.toLowerCase().trim();
+
+  if (iconSlug && !remoteIconFailed) {
+    return (
+      <img
+        src={`https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/${iconSlug}/${iconSlug}-original.svg`}
+        alt=""
+        aria-hidden="true"
+        width={size}
+        height={size}
+        loading="lazy"
+        onError={() => setRemoteIconFailed(true)}
+        className={`${className} object-contain`}
+      />
+    );
+  }
 
   // TypeScript
   if (normName.includes('typescript') || normName === 'ts') {

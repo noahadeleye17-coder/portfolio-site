@@ -95,6 +95,21 @@
 
   .menu-trigger:hover { transform: scale(1.06); background: #F6E9C4; }
   .dark .menu-trigger { border-color: #4A3C31; background: #3A2F26; color: #E4DBCB; }
+
+  .project-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.625rem;
+    color: #9C8A6E;
+    transition: background-color 150ms ease, color 150ms ease, transform 150ms ease;
+  }
+
+  .project-action:hover { background: #EFE6D5; color: #3A2F26; transform: translateY(-1px); }
+  .dark .project-action { color: #B9A98C; }
+  .dark .project-action:hover { background: #4A3C31; color: #FFF; }
 }
 
 html {

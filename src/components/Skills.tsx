@@ -56,7 +56,7 @@ export const Skills: React.FC<SkillsProps> = ({ categories, projects = [], onSel
                 >
                   <span className="absolute -right-6 -top-6 h-14 w-14 rounded-full bg-[#CC9A24]/0 transition-colors duration-300 group-hover:bg-[#CC9A24]/10" />
                   <span className="relative flex h-11 w-11 items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3 sm:h-12 sm:w-12">
-                    <TechLogo name={skill.name} size={42} className="h-10 w-10 sm:h-11 sm:w-11" />
+                    <TechLogo name={skill.name} iconSlug={skill.iconSlug} size={42} className="h-10 w-10 sm:h-11 sm:w-11" />
                   </span>
                   <span className="relative text-xs font-bold leading-tight text-[#5C4B3A] dark:text-[#E4DBCB]">{skill.name}</span>
                 </button>

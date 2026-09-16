@@ -8,7 +8,7 @@ export const defaultPortfolioData: ProfileData = {
   title: 'Full-Stack Developer & Product Builder',
   headline: 'I build practical web products for Nigerian users: housing tools for FUTA students, WhatsApp-first storefronts for vendors, and playful developer utilities that still respect the stack.',
   email: 'noahadeleye17@gmail.com',
-  location: 'Akure, Nigeria',
+  location: 'Lagos, Nigeria',
   availability: 'Open to internships, freelance work, and collaborations',
   avatarUrl: 'https://github.com/noahadeleye17-coder.png',
   bioParagraphs: [
@@ -39,48 +39,38 @@ export const defaultPortfolioData: ProfileData = {
   skillCategories: [
     {
       title: 'Frontend',
-      description: 'Building clean, responsive interfaces — with or without a framework.',
+      description: 'Core interface technologies.',
       iconName: 'Layout',
       skills: [
-        { name: 'JavaScript (Vanilla)', level: 85, experience: 'Active use', highlighted: true },
-        { name: 'HTML & CSS', level: 88, experience: 'Active use', highlighted: true },
-        { name: 'React & Next.js', level: 75, experience: 'Active use' },
-        { name: 'Tailwind CSS', level: 78, experience: 'Active use' },
-        { name: 'Responsive & mobile-first design', level: 80, experience: 'Active use' }
+        { name: 'JavaScript', iconSlug: 'javascript', level: 85, experience: 'Active use', highlighted: true },
+        { name: 'TypeScript', iconSlug: 'typescript', level: 75, experience: 'Active use' },
+        { name: 'HTML5', iconSlug: 'html5', level: 88, experience: 'Active use', highlighted: true },
+        { name: 'CSS3', iconSlug: 'css3', level: 88, experience: 'Active use', highlighted: true },
+        { name: 'React', iconSlug: 'react', level: 75, experience: 'Active use' },
+        { name: 'Next.js', iconSlug: 'nextjs', level: 75, experience: 'Active use' }
       ]
     },
     {
       title: 'Backend & Data',
-      description: 'Designing APIs, auth flows, and data models for real production apps.',
+      description: 'Application and data foundations.',
       iconName: 'Server',
       skills: [
-        { name: 'Node.js & Express', level: 88, experience: 'Active use', highlighted: true },
-        { name: 'MongoDB & Mongoose', level: 85, experience: 'Active use', highlighted: true },
-        { name: 'JWT & OAuth (Google)', level: 78, experience: 'Active use' },
-        { name: 'REST API design', level: 82, experience: 'Active use' },
-        { name: 'Supabase (Auth, Postgres, Storage)', level: 60, experience: 'Learning by building' }
+        { name: 'Node.js', iconSlug: 'nodejs', level: 88, experience: 'Active use', highlighted: true },
+        { name: 'Express', iconSlug: 'express', level: 88, experience: 'Active use', highlighted: true },
+        { name: 'MongoDB', iconSlug: 'mongodb', level: 85, experience: 'Active use', highlighted: true },
+        { name: 'PostgreSQL', iconSlug: 'postgresql', level: 70, experience: 'Active use' },
+        { name: 'REST APIs', level: 82, experience: 'Active use' }
       ]
     },
     {
-      title: 'Cloud & Deployment',
-      description: 'Getting real projects live and keeping them running.',
-      iconName: 'Cloud',
+      title: 'Workflow',
+      description: 'Versioning, delivery, and collaboration.',
+      iconName: 'GitBranch',
       skills: [
-        { name: 'Render', level: 80, experience: 'Active use', highlighted: true },
-        { name: 'Vercel', level: 80, experience: 'Active use', highlighted: true },
-        { name: 'Cloudinary (media pipeline)', level: 78, experience: 'Active use' },
-        { name: 'MongoDB Atlas', level: 80, experience: 'Active use' },
-        { name: 'PWA & Capacitor (app packaging)', level: 55, experience: 'Learning by building' }
-      ]
-    },
-    {
-      title: 'AI & Emerging Tools',
-      description: 'Integrating AI where it genuinely helps the product, not just for the sake of it.',
-      iconName: 'Cpu',
-      skills: [
-        { name: 'Google Gemini API integration', level: 65, experience: 'Active use' },
-        { name: 'AI-assisted feature design', level: 65, experience: 'Active use' },
-        { name: 'Product design fundamentals', level: 50, experience: 'Currently learning' }
+        { name: 'Docker', iconSlug: 'docker', level: 70, experience: 'Active use' },
+        { name: 'Git', iconSlug: 'git', level: 82, experience: 'Active use', highlighted: true },
+        { name: 'GitHub', iconSlug: 'github', level: 82, experience: 'Active use', highlighted: true },
+        { name: 'GitHub Actions', iconSlug: 'githubactions', level: 65, experience: 'Active use' }
       ]
     }
   ],
@@ -185,7 +175,7 @@ export const defaultPortfolioData: ProfileData = {
       role: 'Founder & Full-Stack Developer',
       company: 'Off-Campus Hub',
       period: '2026 — Present',
-      location: 'Akure, Nigeria (Remote)',
+      location: 'Lagos, Nigeria',
       description: [
         'Designed, built, and deployed a full-stack student housing and roommate-matching platform solo, from database schema to production deployment.',
         'Built a full admin dashboard, PWA support, and a server-side rendering fix so shared listing links unfurl correctly.',

@@ -95,7 +95,7 @@ export const About: React.FC<AboutProps> = ({ profile, onOpenResume }) => {
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               <div className="p-4 rounded-xl bg-white dark:bg-[#3A2F26] border border-[#E4DBCB] dark:border-[#4A3C31]">
                 <span className="text-xs text-[#B9A98C] dark:text-[#9C8A6E] uppercase tracking-wider font-semibold block">Based in</span>
-                <span className="text-sm font-bold text-[#4A3C31] dark:text-[#E4DBCB] mt-1 block">Akure, Nigeria</span>
+                <span className="text-sm font-bold text-[#4A3C31] dark:text-[#E4DBCB] mt-1 block">Lagos, Nigeria</span>
               </div>
               <div className="p-4 rounded-xl bg-white dark:bg-[#3A2F26] border border-[#E4DBCB] dark:border-[#4A3C31]">
                 <span className="text-xs text-[#B9A98C] dark:text-[#9C8A6E] uppercase tracking-wider font-semibold block">Education</span>
