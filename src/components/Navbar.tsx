@@ -62,8 +62,8 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <>
-      <header id="main-navbar" className={`fixed inset-x-0 top-0 z-40 transition-all duration-300 ${isScrolled ? 'border-b border-[#E4DBCB]/80 bg-white/80 py-2.5 shadow-xs backdrop-blur-md dark:border-[#4A3C31]/80 dark:bg-[#2A211C]/80' : 'py-4'}`}>
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <header id="main-navbar" className={`fixed left-3 right-3 top-3 z-40 mx-auto max-w-7xl rounded-2xl border transition-all duration-300 sm:left-5 sm:right-5 lg:left-8 lg:right-8 ${isScrolled ? 'border-[#E4DBCB]/80 bg-white/90 py-2.5 shadow-lg backdrop-blur-md dark:border-[#4A3C31]/80 dark:bg-[#2A211C]/90' : 'border-[#E4DBCB]/70 bg-white/80 py-3 shadow-md backdrop-blur-md dark:border-[#4A3C31]/70 dark:bg-[#2A211C]/80'}`}>
+      <div className="mx-auto px-3 sm:px-4 lg:px-5">
         <div className="flex items-center justify-between">
           <a href="#hero" onClick={() => handleNavClick('#hero')} className="group flex items-center gap-2.5 text-lg font-bold tracking-tight sm:text-xl">
             <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#B9861F] font-mono text-sm font-bold text-white shadow-xs transition-transform group-hover:scale-105">N</div>

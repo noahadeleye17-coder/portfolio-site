@@ -77,6 +77,28 @@ export default function App() {
     localStorage.setItem(STORAGE_KEY_THEME, isDark ? 'dark' : 'light');
   }, [isDark]);
 
+  useEffect(() => {
+    const revealTargets = document.querySelectorAll<HTMLElement>('main > section, #main-footer');
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('scroll-revealed');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12, rootMargin: '0px 0px -48px' },
+    );
+
+    revealTargets.forEach((element) => {
+      element.classList.add('scroll-reveal');
+      observer.observe(element);
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
   // Global keyboard shortcuts (Cmd+K / Ctrl+K)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
