@@ -30,6 +30,12 @@ export const defaultPortfolioData: ProfileData = {
       username: 'noahadeleye17-coder'
     },
     {
+      platform: 'linkedin',
+      label: 'LinkedIn',
+      url: 'https://www.linkedin.com/in/noah-adeleye/',
+      username: 'noah-adeleye'
+    },
+    {
       platform: 'email',
       label: 'Email',
       url: 'mailto:noahadeleye17@gmail.com',

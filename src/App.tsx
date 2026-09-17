@@ -29,7 +29,18 @@ export default function App() {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_PROFILE);
       if (saved) {
-        return JSON.parse(saved);
+        const parsedProfile: ProfileData = JSON.parse(saved);
+        const hasLinkedIn = parsedProfile.socialLinks.some((social) => social.platform === 'linkedin');
+        if (!hasLinkedIn) {
+          const linkedIn = defaultPortfolioData.socialLinks.find((social) => social.platform === 'linkedin');
+          if (linkedIn) {
+            return {
+              ...parsedProfile,
+              socialLinks: [...parsedProfile.socialLinks, linkedIn],
+            };
+          }
+        }
+        return parsedProfile;
       }
     } catch {
       // Fallback
