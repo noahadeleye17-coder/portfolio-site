@@ -1,13 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   ArrowUp, 
   Github, 
   Linkedin, 
   Twitter, 
   Mail, 
-  Heart, 
-  Code2,
-  Terminal
+  Sparkles
 } from 'lucide-react';
 import { ProfileData } from '../types';
 
@@ -16,13 +14,56 @@ interface FooterProps {
 }
 
 export const Footer: React.FC<FooterProps> = ({ profile }) => {
+  const [avatarFailed, setAvatarFailed] = useState(false);
+
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
-    <footer id="main-footer" className="bg-white dark:bg-[#2A211C] border-t border-[#E4DBCB] dark:border-[#4A3C31] transition-colors">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+    <footer id="main-footer" className="relative overflow-hidden border-t border-[#E4DBCB] bg-gradient-to-br from-[#FFFDF8] via-[#F8EED9] to-[#F3D9A0] dark:border-[#4A3C31] dark:from-[#2A211C] dark:via-[#33271F] dark:to-[#4A351B] transition-colors">
+      <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-[#D9A62E]/20 blur-3xl dark:bg-[#D9A62E]/10" />
+      <div className="pointer-events-none absolute -bottom-32 left-1/3 h-72 w-72 rounded-full bg-[#B9861F]/15 blur-3xl dark:bg-[#B9861F]/10" />
+
+      <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
+        <div className="mb-10 grid gap-8 overflow-hidden rounded-[2rem] border border-[#E8C765]/60 bg-[#FFF9EE]/65 p-5 shadow-sm backdrop-blur-sm dark:border-[#8A6015]/50 dark:bg-[#2A211C]/55 sm:p-7 lg:grid-cols-[1fr_auto] lg:items-center">
+          <div className="max-w-xl">
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#E8C765]/70 bg-[#F6E9C4]/80 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-[#8A6015] dark:border-[#8A6015]/60 dark:bg-[#3D2F12]/60 dark:text-[#D9A62E]">
+              <Sparkles className="h-3.5 w-3.5" />
+              <span>Still building</span>
+            </div>
+            <h2 className="max-w-lg text-2xl font-extrabold tracking-tight text-[#3A2F26] dark:text-white sm:text-3xl">
+              Good products start with a useful idea.
+            </h2>
+            <p className="mt-3 max-w-lg text-sm leading-relaxed text-[#7A6B58] dark:text-[#B9A98C]">
+              Thanks for making it all the way down here. I’m always up for turning a rough idea into something people can actually use.
+            </p>
+          </div>
+
+          <div className="relative mx-auto w-44 rotate-2 rounded-2xl border-4 border-white bg-[#B9861F] p-1.5 shadow-xl transition-transform duration-300 hover:rotate-0 dark:border-[#E4DBCB]/20 sm:mr-4">
+            <div className="absolute -right-3 -top-4 rounded-full bg-[#3A2F26] px-2.5 py-1 font-mono text-[10px] font-bold text-[#F6E9C4] shadow-md dark:bg-[#D9A62E] dark:text-[#2A211C]">
+              ship it
+            </div>
+            <div className="aspect-square overflow-hidden rounded-xl bg-[#F6E9C4] dark:bg-[#4A3C31]">
+              {avatarFailed ? (
+                <div className="flex h-full items-center justify-center font-mono text-5xl font-bold text-[#B9861F] dark:text-[#D9A62E]">
+                  {profile.name.charAt(0)}
+                </div>
+              ) : (
+                <img
+                  src={profile.avatarUrl}
+                  alt={`${profile.name} portrait`}
+                  onError={() => setAvatarFailed(true)}
+                  className="h-full w-full object-cover"
+                  referrerPolicy="no-referrer"
+                />
+              )}
+            </div>
+            <div className="px-1 pb-0.5 pt-2 text-center font-mono text-[10px] font-bold uppercase tracking-wider text-white">
+              product builder
+            </div>
+          </div>
+        </div>
         
         <div className="flex flex-col md:flex-row items-center justify-between gap-8 pb-12 border-b border-[#EFE6D5] dark:border-[#4A3C31]/80">
           
