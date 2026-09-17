@@ -61,7 +61,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   return (
-    <header id="main-navbar" className={`fixed inset-x-0 top-0 z-40 transition-all duration-300 ${isScrolled ? 'border-b border-[#E4DBCB]/80 bg-white/80 py-2.5 shadow-xs backdrop-blur-md dark:border-[#4A3C31]/80 dark:bg-[#2A211C]/80' : 'py-4'}`}>
+    <>
+      <header id="main-navbar" className={`fixed inset-x-0 top-0 z-40 transition-all duration-300 ${isScrolled ? 'border-b border-[#E4DBCB]/80 bg-white/80 py-2.5 shadow-xs backdrop-blur-md dark:border-[#4A3C31]/80 dark:bg-[#2A211C]/80' : 'py-4'}`}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
           <a href="#hero" onClick={() => handleNavClick('#hero')} className="group flex items-center gap-2.5 text-lg font-bold tracking-tight sm:text-xl">
@@ -93,6 +94,8 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
       </div>
 
+      </header>
+
       <div className={`fixed inset-0 z-50 transition-[visibility] duration-300 lg:hidden ${mobileMenuOpen ? 'visible' : 'invisible'}`} aria-hidden={!mobileMenuOpen}>
         <button type="button" aria-label="Close menu" onClick={() => setMobileMenuOpen(false)} className={`absolute inset-0 bg-[#2A211C]/25 backdrop-blur-[2px] transition-opacity duration-300 ${mobileMenuOpen ? 'opacity-100' : 'opacity-0'}`} />
         <aside className={`absolute right-0 top-0 flex h-full w-[min(21rem,88vw)] flex-col border-l border-[#E4DBCB] bg-[#FFF9EE] p-5 shadow-2xl transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] dark:border-[#4A3C31] dark:bg-[#2A211C] ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
@@ -114,6 +117,6 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         </aside>
       </div>
-    </header>
+    </>
   );
 };
