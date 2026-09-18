@@ -1,0 +1,13 @@
+diff --git a/src/components/Navbar.tsx b/src/components/Navbar.tsx
+index 45e4c11..2f03281 100644
+--- a/src/components/Navbar.tsx
++++ b/src/components/Navbar.tsx
+@@ -69,7 +69,7 @@ export const Navbar: React.FC<NavbarProps> = ({
+             <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#B9861F] shadow-xs transition-transform group-hover:scale-105">
+               <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="white" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                 <path d="M7 6 L13 12 L7 18" />
+-                <rect x="15.5" y="9.5" width="2.6" height="5" rx="0.6" fill="white" stroke="none" />
++                <rect x="15" y="15" width="6.5" height="2" rx="1" fill="white" stroke="none" />
+               </svg>
+             </div>
+             <div className="flex flex-col">
