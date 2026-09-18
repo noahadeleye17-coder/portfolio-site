@@ -71,7 +71,10 @@ export const Footer: React.FC<FooterProps> = ({ profile }) => {
           <div className="text-center md:text-left space-y-2 max-w-sm">
             <div className="flex items-center justify-center md:justify-start gap-2.5">
               <div className="w-7 h-7 rounded-lg bg-[#B9861F] dark:bg-[#CC9A24] text-white flex items-center justify-center font-mono font-bold text-xs">
-                {profile.name.charAt(0)}
+                <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M7 6 L13 12 L7 18" />
+                  <rect x="15" y="15" width="6.5" height="2" rx="1" fill="currentColor" stroke="none" />
+                </svg>
               </div>
               <span className="font-bold text-lg text-[#3A2F26] dark:text-white">
                 {profile.name}
