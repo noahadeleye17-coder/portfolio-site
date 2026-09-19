@@ -63,6 +63,7 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose }) 
           <img
             src={project.image}
             alt={project.title}
+            decoding="async"
             className="w-full h-full object-cover"
             referrerPolicy="no-referrer"
           />

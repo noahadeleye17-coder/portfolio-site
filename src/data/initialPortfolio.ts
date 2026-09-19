@@ -1,7 +1,8 @@
 import { ProfileData } from '../types';
-import offCampusHubImage from '../Assets/offcampushub.ng_(iPhone 16 Pro Max).png';
-import commitmentIssuesImage from '../Assets/commitment-issues-alpha.vercel.app_(iPhone 16 Pro Max).png';
-import vendorStorefrontImage from '../Assets/vendor-storefront-roan.vercel.app_(iPhone 16 Pro Max).png';
+import offCampusHubImage from '../Assets/offcampushub.webp';
+import commitmentIssuesImage from '../Assets/commitment-issues.webp';
+import vendorStorefrontImage from '../Assets/vendor-storefront.webp';
+import jobBoardImage from '../Assets/job-board.webp';
 
 export const defaultPortfolioData: ProfileData = {
   name: 'Noah Adeleye',
@@ -143,7 +144,7 @@ export const defaultPortfolioData: ProfileData = {
       description: 'A backend-focused job board platform built as part of a CodeAlpha Backend Development internship task.',
       fullDescription: 'Built as one of the required tasks for a CodeAlpha Backend Development internship: a job board platform with the same backend stack used across my other projects, covering the core flows a job board needs end to end.',
       category: 'Full Stack',
-      image: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&q=80&w=1200',
+      image: jobBoardImage,
       tags: ['Node.js', 'Express', 'MongoDB', 'Mongoose'],
       githubUrl: '',
       liveUrl: '',

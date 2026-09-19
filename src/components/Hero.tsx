@@ -346,6 +346,8 @@ export const Hero: React.FC<HeroProps> = ({
                       <img
                         src={project.image}
                         alt=""
+                        loading="lazy"
+                        decoding="async"
                         className="h-14 w-12 rounded-xl object-cover object-top bg-[#2A211C]"
                         referrerPolicy="no-referrer"
                       />

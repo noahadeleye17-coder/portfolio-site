@@ -40,7 +40,7 @@ export const Projects: React.FC<ProjectsProps> = ({ projects }) => {
           {featuredProjects.map((project) => (
             <article key={project.id} className="group reveal-card overflow-hidden rounded-2xl border border-[#E4DBCB] bg-white shadow-xs transition-all hover:-translate-y-1 hover:border-[#D3C6AF] hover:shadow-lg dark:border-[#4A3C31] dark:bg-[#3A2F26] dark:hover:border-[#5C4B3A]">
               <div className="relative h-52 overflow-hidden bg-[#2A211C] sm:h-60">
-                <img src={project.image} alt={project.title} className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-105" referrerPolicy="no-referrer" />
+                <img src={project.image} alt={project.title} loading="lazy" decoding="async" className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-105" referrerPolicy="no-referrer" />
                 <div className="absolute inset-0 bg-linear-to-t from-[#2A211C]/80 via-transparent to-transparent" />
                 <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-[#3A2F26]/80 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm">
                   <Star className="h-3 w-3 fill-current text-[#DFB94A]" />
