@@ -129,7 +129,7 @@ export const Footer: React.FC<FooterProps> = ({ profile }) => {
         {/* Bottom Bar: Copyright & Back to Top */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#9C8A6E] dark:text-[#B9A98C]">
           <div className="flex items-center gap-1.5">
-            <span>© {new Date().getFullYear()} {profile.name}. All rights reserved.</span>
+            <span suppressHydrationWarning>© {new Date().getFullYear()} {profile.name}. All rights reserved.</span>
           </div>
 
           <div className="flex items-center gap-4">

@@ -25,40 +25,41 @@ const STORAGE_KEY_PROFILE = 'portfolio_profile_data_v2';
 const STORAGE_KEY_THEME = 'portfolio_theme_mode';
 
 export default function App() {
-  const [profile, setProfile] = useState<ProfileData>(() => {
+  // The first client render must match the prerendered HTML, so state starts from the
+  // defaults and the visitor's saved profile/theme are applied right after hydration.
+  const [profile, setProfile] = useState<ProfileData>(defaultPortfolioData);
+  const [isDark, setIsDark] = useState<boolean>(false);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_PROFILE);
       if (saved) {
         const parsedProfile: ProfileData = JSON.parse(saved);
         const hasLinkedIn = parsedProfile.socialLinks.some((social) => social.platform === 'linkedin');
-        if (!hasLinkedIn) {
-          const linkedIn = defaultPortfolioData.socialLinks.find((social) => social.platform === 'linkedin');
-          if (linkedIn) {
-            return {
-              ...parsedProfile,
-              socialLinks: [...parsedProfile.socialLinks, linkedIn],
-            };
-          }
-        }
-        return parsedProfile;
+        const linkedIn = defaultPortfolioData.socialLinks.find((social) => social.platform === 'linkedin');
+        setProfile(
+          !hasLinkedIn && linkedIn
+            ? { ...parsedProfile, socialLinks: [...parsedProfile.socialLinks, linkedIn] }
+            : parsedProfile,
+        );
       }
     } catch {
       // Fallback
     }
-    return defaultPortfolioData;
-  });
 
-  const [isDark, setIsDark] = useState<boolean>(() => {
+    let dark = false;
     try {
       const savedTheme = localStorage.getItem(STORAGE_KEY_THEME);
-      if (savedTheme) {
-        return savedTheme === 'dark';
-      }
-      return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      dark = savedTheme
+        ? savedTheme === 'dark'
+        : Boolean(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
     } catch {
-      return false;
+      dark = false;
     }
-  });
+    setIsDark(dark);
+    setIsHydrated(true);
+  }, []);
 
   const [isResumeOpen, setIsResumeOpen] = useState(false);
   const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
@@ -66,16 +67,22 @@ export default function App() {
   const [isTerminalOpen, setIsTerminalOpen] = useState(false);
   const [activeModalProject, setActiveModalProject] = useState<Project | null>(null);
 
-  // Sync dark mode class to <html> tag
+  // Sync dark mode class to <html> tag (index.html applies it before first paint;
+  // this waits for the saved theme to load so it never overrides it with the default)
   useEffect(() => {
+    if (!isHydrated) return;
     const root = document.documentElement;
     if (isDark) {
       root.classList.add('dark');
     } else {
       root.classList.remove('dark');
     }
-    localStorage.setItem(STORAGE_KEY_THEME, isDark ? 'dark' : 'light');
-  }, [isDark]);
+    try {
+      localStorage.setItem(STORAGE_KEY_THEME, isDark ? 'dark' : 'light');
+    } catch {
+      // Ignore
+    }
+  }, [isDark, isHydrated]);
 
   useEffect(() => {
     const revealTargets = document.querySelectorAll<HTMLElement>('main > section, #main-footer');
@@ -92,6 +99,9 @@ export default function App() {
     );
 
     revealTargets.forEach((element) => {
+      // The prerendered page is already visible. Only sections still below the fold get the
+      // reveal treatment, so on-screen content doesn't vanish and fade back in on hydration.
+      if (element.getBoundingClientRect().top < window.innerHeight) return;
       element.classList.add('scroll-reveal');
       observer.observe(element);
     });
