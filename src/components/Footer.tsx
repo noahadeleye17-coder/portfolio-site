@@ -60,7 +60,7 @@ export const Footer: React.FC<FooterProps> = ({ profile }) => {
               )}
             </div>
             <div className="px-1 pb-0.5 pt-2 text-center font-mono text-[10px] font-bold uppercase tracking-wider text-white">
-              product builder
+              fullstack developer
             </div>
           </div>
         </div>
@@ -81,7 +81,7 @@ export const Footer: React.FC<FooterProps> = ({ profile }) => {
               </span>
             </div>
             <p className="text-xs sm:text-sm text-[#9C8A6E] dark:text-[#B9A98C]">
-              {profile.title} • Designing scalable architectures & modern web systems.
+              {profile.title} • Designing scalable architectures & modern web and mobile systems.
             </p>
           </div>
 
