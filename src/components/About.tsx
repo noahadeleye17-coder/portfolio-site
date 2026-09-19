@@ -53,7 +53,7 @@ export const About: React.FC<AboutProps> = ({ profile, onOpenResume }) => {
             <span>About</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#3A2F26] dark:text-white tracking-tight">
-            A builder, briefly.
+            My Bio, briefly.
           </h2>
         </div>
 
